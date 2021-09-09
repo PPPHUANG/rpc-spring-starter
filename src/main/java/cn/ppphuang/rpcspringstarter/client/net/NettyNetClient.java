@@ -7,8 +7,7 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -25,14 +24,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Create: 2021/9/9
  */
 @Slf4j
-public class NettyNetClient implements NetClient{
+public class NettyNetClient implements NetClient {
 
-    private static ExecutorService threadPool = new ThreadPoolExecutor(4,10,200, TimeUnit.SECONDS,new LinkedBlockingDeque<>(1000),new NameTreadFactory());
+    private static ExecutorService threadPool = new ThreadPoolExecutor(4, 10, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
 
     private EventLoopGroup loopGroup = new NioEventLoopGroup(4);
 
     /**
-     *已连接的服务缓存
+     * 已连接的服务缓存
      * key: 服务地址 ip:port
      */
     public static Map<String, SendHandlerV2> connectedServerNodes = new ConcurrentHashMap<>();
@@ -76,7 +75,26 @@ public class NettyNetClient implements NetClient{
                 return handlerV2.sendRequest(rpcRequest);
             }
         }
-        return null;
+        String[] addressInfo = address.split(":");
+        final String serverAddress = addressInfo[0];
+        final String serverPort = addressInfo[1];
+        final SendHandlerV2 handler = new SendHandlerV2(address, messageProtocol);
+        threadPool.submit(() -> {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.group(loopGroup).channel(NioSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(handler);
+                        }
+                    });
+            //new connect
+            ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
+            channelFuture.addListener((ChannelFutureListener) channelFuture1 -> connectedServerNodes.put(address, handler));
+        });
+        log.info("使用新的连接。。。");
+        return handler.sendRequest(rpcRequest);
     }
 
     static class NameTreadFactory implements ThreadFactory {
