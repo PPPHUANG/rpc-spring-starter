@@ -19,4 +19,9 @@ public class RpcConstant {
     public static final String ZK_PATH_DELIMITER = "/";
 
 
+    /**
+     * 编码格式
+     */
+    public static final String UTF_8 = "UTF-8";
+
 }

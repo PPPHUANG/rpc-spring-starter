@@ -2,6 +2,8 @@ package cn.ppphuang.rpcspringstarter.client.net;
 
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ServiceDiscoverer;
+import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
+import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
@@ -12,6 +14,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 客户端代理工厂：用于创建远程服务代理类
@@ -45,11 +48,11 @@ public class ClientProxyFactory {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getName().equals("toString")) {
+            if ("toString".equals(method.getName())) {
                 return proxy.toString();
             }
 
-            if (method.getName().equals("hashCode")) {
+            if ("hashCode".equals(method.getName())) {
                 return 0;
             }
 
@@ -59,7 +62,22 @@ public class ClientProxyFactory {
 //            todo
             Service service = serviceList.get(0);
             //2. 构建request对象
-            return null;
+            RpcRequest rpcRequest = new RpcRequest();
+            rpcRequest.setRequestId(UUID.randomUUID().toString());
+            rpcRequest.setServiceName(service.getName());
+            rpcRequest.setMethod(method.getName());
+            rpcRequest.setParameters(args);
+            rpcRequest.setParametersTypes(method.getParameterTypes());
+            //3. 协议编组
+            MessageProtocol messageProtocol = supportMessageProtocols.get(service.getProtocol());
+            RpcResponse response = netClient.sendRequest(rpcRequest, service, messageProtocol);
+            if (response == null) {
+                throw new RpcException("the response is null");
+            }
+            if (response.getException() != null) {
+                return response.getException();
+            }
+            return response.getReturnValue();
         }
     }
 

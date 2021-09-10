@@ -26,6 +26,10 @@ public class RpcResponse implements Serializable {
     public RpcResponse() {
     }
 
+    public RpcResponse(RpcStatusEnum rpcStatus) {
+        this.rpcStatus = rpcStatus;
+    }
+
     public String getRequestId() {
         return requestId;
     }
