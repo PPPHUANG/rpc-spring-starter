@@ -96,4 +96,36 @@ public class ClientProxyFactory {
         }
         return services;
     }
+
+    public ServiceDiscoverer getServiceDiscoverer() {
+        return serviceDiscoverer;
+    }
+
+    public void setServiceDiscoverer(ServiceDiscoverer serviceDiscoverer) {
+        this.serviceDiscoverer = serviceDiscoverer;
+    }
+
+    public NetClient getNetClient() {
+        return netClient;
+    }
+
+    public void setNetClient(NetClient netClient) {
+        this.netClient = netClient;
+    }
+
+    public Map<String, MessageProtocol> getSupportMessageProtocols() {
+        return supportMessageProtocols;
+    }
+
+    public void setSupportMessageProtocols(Map<String, MessageProtocol> supportMessageProtocols) {
+        this.supportMessageProtocols = supportMessageProtocols;
+    }
+
+    public Map<Class<?>, Object> getObjectCache() {
+        return objectCache;
+    }
+
+    public void setObjectCache(Map<Class<?>, Object> objectCache) {
+        this.objectCache = objectCache;
+    }
 }

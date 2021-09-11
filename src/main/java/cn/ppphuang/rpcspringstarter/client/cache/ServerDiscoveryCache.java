@@ -21,7 +21,7 @@ public class ServerDiscoveryCache {
     /**
      * 客户端注入的远程服务service class
      */
-    private static final List<Service> SERVER_CLASS_NAMES = new ArrayList<>();
+    public static final List<String> SERVER_CLASS_NAMES = new ArrayList<>();
 
 
     /**

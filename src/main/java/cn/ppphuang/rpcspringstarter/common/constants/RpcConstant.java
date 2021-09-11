@@ -24,4 +24,9 @@ public class RpcConstant {
      */
     public static final String UTF_8 = "UTF-8";
 
+    /**
+     * java序列化协议
+     */
+    public static final String PROTOCOL_JAVA = "java";
+
 }
