@@ -29,4 +29,9 @@ public class RpcConstant {
      */
     public static final String PROTOCOL_JAVA = "java";
 
+
+    /**
+     * 客户端随机负载均衡
+     */
+    public static final String BALANCE_RANDOM = "random";
 }
