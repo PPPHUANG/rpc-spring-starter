@@ -32,7 +32,6 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        super.channelRead(ctx, msg);
         NettyRpcServer.THREAD_POOL.submit(() -> {
             try {
                 log.debug("the server receives message :{}", msg);

@@ -77,7 +77,6 @@ public class NettyRpcServer extends RpcServer {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r, "rpcServer-" + mThreadNum.getAndIncrement());
-            System.out.println(t.getName() + " has been created");
             return t;
         }
     }

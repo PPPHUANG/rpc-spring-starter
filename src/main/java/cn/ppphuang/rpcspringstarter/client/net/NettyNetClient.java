@@ -104,7 +104,6 @@ public class NettyNetClient implements NetClient {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r, "rpcClient-" + mThreadNum.getAndIncrement());
-            System.out.println(t.getName() + " has been created");
             return t;
         }
     }

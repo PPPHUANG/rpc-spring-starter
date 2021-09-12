@@ -55,6 +55,7 @@ public class RpcFuture<T> implements Future<T> {
 
     public void setResponse(T response) {
         this.response = response;
+        countDownLatch.countDown();
     }
 
     public long getBeginTime() {

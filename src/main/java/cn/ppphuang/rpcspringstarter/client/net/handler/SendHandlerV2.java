@@ -107,7 +107,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         try {
             byte[] data = messageProtocol.marshallingRequest(request);
             ByteBuf buffer = Unpooled.buffer(data.length);
-            buffer.readBytes(data);
+            buffer.writeBytes(data);
             if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
                 channel.writeAndFlush(buffer);
                 //waiting
