@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
+import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ServiceDiscoverer;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
@@ -32,7 +33,7 @@ public class ClientProxyFactory {
 
     private Map<Class<?>, Object> objectCache = new HashMap<>();
 
-//    private LoadBalance loadBalance;
+    private LoadBalance loadBalance;
 
     public <T> T getProxy(Class<T> clazz) {
         return (T) objectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz)));
@@ -59,8 +60,7 @@ public class ClientProxyFactory {
             //1. 获得服务信息
             String serviceName = clazz.getName();
             List<Service> serviceList = getServiceList(serviceName);
-//            todo
-            Service service = serviceList.get(0);
+            Service service = loadBalance.selectOne(serviceList);
             //2. 构建request对象
             RpcRequest rpcRequest = new RpcRequest();
             rpcRequest.setRequestId(UUID.randomUUID().toString());
@@ -127,5 +127,13 @@ public class ClientProxyFactory {
 
     public void setObjectCache(Map<Class<?>, Object> objectCache) {
         this.objectCache = objectCache;
+    }
+
+    public LoadBalance getLoadBalance() {
+        return loadBalance;
+    }
+
+    public void setLoadBalance(LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
     }
 }

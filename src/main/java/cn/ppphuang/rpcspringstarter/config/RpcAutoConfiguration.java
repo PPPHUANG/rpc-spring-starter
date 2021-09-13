@@ -1,6 +1,8 @@
 package cn.ppphuang.rpcspringstarter.config;
 
+import cn.ppphuang.rpcspringstarter.annotation.LoadBalanceAno;
 import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
@@ -61,7 +63,8 @@ public class RpcAutoConfiguration {
         //setSupportMessageProtocols
         Map<String, MessageProtocol> supportMessageProtocol = buildSupportMessageProtocol();
         clientProxyFactory.setSupportMessageProtocols(supportMessageProtocol);
-        // todo
+        LoadBalance loadBalance = getLoadBalance(rpcConfig.getLoadBalance());
+        clientProxyFactory.setLoadBalance(loadBalance);
         clientProxyFactory.setNetClient(new NettyNetClient());
 
         return clientProxyFactory;
@@ -95,5 +98,17 @@ public class RpcAutoConfiguration {
             supportMessageProtocol.put(annotation.value(), messageProtocol);
         }
         return supportMessageProtocol;
+    }
+
+    private LoadBalance getLoadBalance(String name) {
+        ServiceLoader<LoadBalance> loadBalances = ServiceLoader.load(LoadBalance.class);
+        for (LoadBalance loadBalance : loadBalances) {
+            LoadBalanceAno lb = loadBalance.getClass().getAnnotation(LoadBalanceAno.class);
+            Assert.notNull(lb, "load balance name can not be empty!");
+            if (name.equals(lb.value())) {
+                return loadBalance;
+            }
+        }
+        throw new RpcException("invalid load balance config");
     }
 }

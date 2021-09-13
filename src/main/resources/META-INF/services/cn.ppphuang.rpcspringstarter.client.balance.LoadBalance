@@ -1,0 +1,4 @@
+cn.ppphuang.rpcspringstarter.client.balance.FullRoundBalance
+cn.ppphuang.rpcspringstarter.client.balance.RandomBalance
+cn.ppphuang.rpcspringstarter.client.balance.WeightRoundBalance
+cn.ppphuang.rpcspringstarter.client.balance.SmoothWeightRoundBalance

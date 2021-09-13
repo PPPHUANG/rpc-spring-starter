@@ -34,4 +34,19 @@ public class RpcConstant {
      * 客户端随机负载均衡
      */
     public static final String BALANCE_RANDOM = "random";
+
+    /**
+     * 客户端轮询负载均衡
+     */
+    public static final String BALANCE_FULL_ROUND = "round";
+
+    /**
+     * 客户端加权轮询负载均衡
+     */
+    public static final String BALANCE_WEIGHT_ROUND = "weightRound";
+
+    /**
+     * 客户端平滑加权轮询负载均衡
+     */
+    public static final String BALANCE_SMOOTH_WEIGHT_ROUND = "smoothWeightRound";
 }
