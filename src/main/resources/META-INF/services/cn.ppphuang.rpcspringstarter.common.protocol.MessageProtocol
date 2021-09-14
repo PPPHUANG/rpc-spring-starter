@@ -1,1 +1,3 @@
 cn.ppphuang.rpcspringstarter.common.protocol.JavaSerializeMessageProtocol
+cn.ppphuang.rpcspringstarter.common.protocol.KryoMessageProtocol
+cn.ppphuang.rpcspringstarter.common.protocol.ProtoBufSerializeMessageProtocol

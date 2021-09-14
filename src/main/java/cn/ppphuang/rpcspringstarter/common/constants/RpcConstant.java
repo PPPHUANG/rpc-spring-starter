@@ -29,6 +29,15 @@ public class RpcConstant {
      */
     public static final String PROTOCOL_JAVA = "java";
 
+    /**
+     * protobuf序列化协议
+     */
+    public static final String PROTOCOL_PROTOBUF = "protobuf";
+
+    /**
+     * kryo序列化协议
+     */
+    public static final String PROTOCOL_KRYO = "kryo";
 
     /**
      * 客户端随机负载均衡
