@@ -10,6 +10,7 @@ import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.server.RpcServer;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -53,11 +54,20 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
     private void injectService(ApplicationContext context) {
         String[] names = context.getBeanDefinitionNames();
         for (String name : names) {
-            Class<?> clazz = context.getType(name);
-//            Class<?> clazz = context.getBean(name).getClass();
+            Object bean = context.getBean(name);
+            Class<?> clazz = bean.getClass();
             if (Objects.isNull(clazz)) {
                 continue;
             }
+
+            if (AopUtils.isCglibProxy(bean)) {
+                //aop增强的类生成cglib类，需要Superclass才能获取定义的字段
+                clazz = clazz.getSuperclass();
+            } else if(AopUtils.isJdkDynamicProxy(bean)) {
+                //todo 动态代理类，可能也需要
+                clazz = clazz.getSuperclass();
+            }
+
             Field[] declaredFields = clazz.getDeclaredFields();
             //设置InjectService的代理类
             for (Field field : declaredFields) {
