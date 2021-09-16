@@ -64,7 +64,7 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
                 //aop增强的类生成cglib类，需要Superclass才能获取定义的字段
                 clazz = clazz.getSuperclass();
             } else if(AopUtils.isJdkDynamicProxy(bean)) {
-                //todo 动态代理类，可能也需要
+                //动态代理类，可能也需要
                 clazz = clazz.getSuperclass();
             }
 
