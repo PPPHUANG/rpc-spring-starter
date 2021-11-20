@@ -2,6 +2,7 @@ package cn.ppphuang.rpcspringstarter.client.net;
 
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandler;
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandlerV2;
+import cn.ppphuang.rpcspringstarter.common.codec.LengthEncoder;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
@@ -11,6 +12,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -52,7 +54,10 @@ public class NettyNetClient implements NetClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(sendHandler);
+                            ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(4096, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthEncoder());
+                            pipeline.addLast(sendHandler);
                         }
                     });
             // start client
@@ -86,7 +91,10 @@ public class NettyNetClient implements NetClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(handler);
+                            ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(4096, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthEncoder());
+                            pipeline.addLast(handler);
                         }
                     });
             //new connect

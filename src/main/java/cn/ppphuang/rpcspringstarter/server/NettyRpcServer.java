@@ -1,14 +1,12 @@
 package cn.ppphuang.rpcspringstarter.server;
 
-import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
+import cn.ppphuang.rpcspringstarter.common.codec.LengthEncoder;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +46,10 @@ public class NettyRpcServer extends RpcServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(new ChannelRequestHandler(requestHandler));
+                            ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(4096, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthEncoder());
+                            pipeline.addLast(new ChannelRequestHandler(requestHandler));
                         }
                     });
             ChannelFuture future = serverBootstrap.bind(port).sync();

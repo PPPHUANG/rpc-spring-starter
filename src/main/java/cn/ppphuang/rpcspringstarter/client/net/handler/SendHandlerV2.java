@@ -69,6 +69,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         byte[] response = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(response);
+        log.debug("Client read string message:{}", new String(response));
         //手动回收
         ReferenceCountUtil.release(byteBuf);
         RpcResponse rpcResponse = messageProtocol.unmarshallingResponse(response);
