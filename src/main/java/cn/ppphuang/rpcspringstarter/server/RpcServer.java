@@ -1,5 +1,7 @@
 package cn.ppphuang.rpcspringstarter.server;
 
+import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
+
 /**
  * 服务抽象类
  *
@@ -21,7 +23,7 @@ public abstract class RpcServer {
     /**
      * 请求handler
      */
-    protected RequestHandler requestHandler;
+    protected RequestBaseHandler requestHandler;
 
     /**
      * 开启
@@ -34,7 +36,7 @@ public abstract class RpcServer {
     public abstract void stop();
 
 
-    public RpcServer(int port, String protocol, RequestHandler requestHandler) {
+    public RpcServer(int port, String protocol, RequestBaseHandler requestHandler) {
         this.port = port;
         this.protocol = protocol;
         this.requestHandler = requestHandler;
@@ -56,11 +58,11 @@ public abstract class RpcServer {
         this.protocol = protocol;
     }
 
-    public RequestHandler getRequestHandler() {
+    public RequestBaseHandler getRequestHandler() {
         return requestHandler;
     }
 
-    public void setRequestHandler(RequestHandler requestHandler) {
+    public void setRequestHandler(RequestBaseHandler requestHandler) {
         this.requestHandler = requestHandler;
     }
 }

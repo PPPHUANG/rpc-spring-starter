@@ -2,6 +2,7 @@ package cn.ppphuang.rpcspringstarter.config;
 
 import cn.ppphuang.rpcspringstarter.annotation.LoadBalanceAno;
 import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.annotation.ServerProxyAno;
 import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
@@ -9,9 +10,8 @@ import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
-import cn.ppphuang.rpcspringstarter.server.NettyRpcServer;
-import cn.ppphuang.rpcspringstarter.server.RequestHandler;
-import cn.ppphuang.rpcspringstarter.server.RpcServer;
+import cn.ppphuang.rpcspringstarter.server.*;
+import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
 import cn.ppphuang.rpcspringstarter.server.register.DefaultRpcProcessor;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ZookeeperServerRegister;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -46,13 +45,16 @@ public class RpcAutoConfiguration {
     }
 
     @Bean
-    public RequestHandler requestHandler(@Autowired ServerRegister serverRegister, @Autowired RpcConfig rpcConfig) {
-        return new RequestHandler(getMessageProtocol(rpcConfig.getProtocol()), serverRegister);
+    public RequestBaseHandler requestBaseHandler(@Autowired ServerRegister serverRegister, @Autowired RpcConfig rpcConfig) {
+        RequestBaseHandler requestHandler = getRequestHandler(rpcConfig.getServerProxyType());
+        requestHandler.setServerRegister(serverRegister);
+        requestHandler.setProtocol(getMessageProtocol(rpcConfig.getProtocol()));
+        return requestHandler;
     }
 
     @Bean
-    public RpcServer rpcServer(@Autowired RequestHandler requestHandler, @Autowired RpcConfig rpcConfig) {
-        return new NettyRpcServer(rpcConfig.getServerPort(), rpcConfig.getProtocol(), requestHandler);
+    public RpcServer rpcServer(@Autowired RequestBaseHandler requestBaseHandler, @Autowired RpcConfig rpcConfig) {
+        return new NettyRpcServer(rpcConfig.getServerPort(), rpcConfig.getProtocol(), requestBaseHandler);
     }
 
     @Bean
@@ -110,5 +112,17 @@ public class RpcAutoConfiguration {
             }
         }
         throw new RpcException("invalid load balance config");
+    }
+
+    private RequestBaseHandler getRequestHandler(String name) {
+        ServiceLoader<RequestBaseHandler> handlers = ServiceLoader.load(RequestBaseHandler.class);
+        for (RequestBaseHandler handler : handlers) {
+            ServerProxyAno rh = handler.getClass().getAnnotation(ServerProxyAno.class);
+            Assert.notNull(rh, "load server proxy type can not be empty!");
+            if (name.equals(rh.value())) {
+                return handler;
+            }
+        }
+        throw new RpcException("invalid server proxy config");
     }
 }

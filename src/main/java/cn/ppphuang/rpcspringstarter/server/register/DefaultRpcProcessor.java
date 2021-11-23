@@ -7,6 +7,8 @@ import cn.ppphuang.rpcspringstarter.client.discovery.ZkChildListenerImpl;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
+import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
+import cn.ppphuang.rpcspringstarter.server.Container;
 import cn.ppphuang.rpcspringstarter.server.RpcServer;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
@@ -46,6 +48,7 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
         //Spring启动完毕会收到Event
         if (Objects.isNull(contextRefreshedEvent.getApplicationContext().getParent())) {
             ApplicationContext applicationContext = contextRefreshedEvent.getApplicationContext();
+            Container.setSpringContext(applicationContext);
             startServer(applicationContext);
             injectService(applicationContext);
         }
@@ -100,6 +103,13 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
 
     private void startServer(ApplicationContext context) {
         Map<String, Object> beans = context.getBeansWithAnnotation(Service.class);
+        RpcConfig rpcConfig = (RpcConfig) context.getBean("rpcConfig");
+        String serverProxyType = rpcConfig.getServerProxyType();
+        //使用反射代理调用
+        if (RpcConstant.SERVER_PROXY_TYPE_REFLECT.equals(serverProxyType)) {
+            //todo
+        }
+        //判定
         if (beans.size() > 0) {
             boolean startServerFlag = true;
             for (Object obj : beans.values()) {
@@ -107,7 +117,7 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
                     Class<?> clazz = obj.getClass();
                     Class<?>[] interfaces = clazz.getInterfaces();
                     ServiceObject so = null;
-                    /**
+                    /*
                      * 如果只实现了一个接口就用接口的className作为服务名
                      * 如果该类实现了多个接口，则使用注解里的value作为服务名
                      */
@@ -118,9 +128,11 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
                             startServerFlag = false;
                             throw new UnsupportedOperationException("The exposed interface is not specific with '" + obj.getClass().getName() + "'");
                         }
+                        // todo
                         so = new ServiceObject(value, Class.forName(value), obj);
                     } else {
                         Class<?> supperClass = interfaces[0];
+                        // todo
                         so = new ServiceObject(supperClass.getName(), supperClass, obj);
                     }
                     serverRegister.register(so);

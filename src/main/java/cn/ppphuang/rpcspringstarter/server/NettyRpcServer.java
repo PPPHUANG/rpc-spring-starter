@@ -1,6 +1,7 @@
 package cn.ppphuang.rpcspringstarter.server;
 
 import cn.ppphuang.rpcspringstarter.common.codec.LengthEncoder;
+import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,7 +30,7 @@ public class NettyRpcServer extends RpcServer {
     public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(4, 8, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
 
 
-    public NettyRpcServer(int port, String protocol, RequestHandler requestHandler) {
+    public NettyRpcServer(int port, String protocol, RequestBaseHandler requestHandler) {
         super(port, protocol, requestHandler);
     }
 

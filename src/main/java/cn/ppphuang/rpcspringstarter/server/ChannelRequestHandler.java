@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.server;
 
+import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,9 +20,9 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
     /**
      * 请求handler
      */
-    protected RequestHandler requestHandler;
+    protected RequestBaseHandler requestHandler;
 
-    public ChannelRequestHandler(RequestHandler requestHandler) {
+    public ChannelRequestHandler(RequestBaseHandler requestHandler) {
         this.requestHandler = requestHandler;
     }
 

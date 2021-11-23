@@ -35,6 +35,11 @@ public class RpcConfig {
      */
     private Integer weight = 1;
 
+    /**
+     * 服务代理类型 reflect： 反射调用 javassist： 字节码生成代理类调用
+     */
+    private String serverProxyType = "reflect";
+
     public String getRegisterAddress() {
         return registerAddress;
     }
@@ -73,5 +78,13 @@ public class RpcConfig {
 
     public void setWeight(Integer weight) {
         this.weight = weight;
+    }
+
+    public String getServerProxyType() {
+        return serverProxyType;
+    }
+
+    public void setServerProxyType(String serverProxyType) {
+        this.serverProxyType = serverProxyType;
     }
 }

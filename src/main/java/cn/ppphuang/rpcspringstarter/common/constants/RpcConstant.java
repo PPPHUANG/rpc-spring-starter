@@ -1,5 +1,10 @@
 package cn.ppphuang.rpcspringstarter.common.constants;
 
+import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
+import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
+import cn.ppphuang.rpcspringstarter.server.Container;
+import cn.ppphuang.rpcspringstarter.server.InvokeProxy;
+
 /**
  * @Author: ppphuang
  * @Create: 2021/9/8
@@ -58,4 +63,34 @@ public class RpcConstant {
      * 客户端平滑加权轮询负载均衡
      */
     public static final String BALANCE_SMOOTH_WEIGHT_ROUND = "smoothWeightRound";
+
+    /**
+     * 服务代理类型 reflect： 反射调用
+     */
+    public static final String SERVER_PROXY_TYPE_REFLECT = "reflect";
+
+    /**
+     * javassist： 字节码生成代理类调用
+     */
+    public static final String SERVER_PROXY_TYPE_JAVASSIST = "javassist";
+
+    /**
+     * 服务容器类名称
+     */
+    public static final String CONTAINER_CLASS_NAME = Container.class.getName();
+
+    /**
+     * 代理类实现接口名称
+     */
+    public static final String INVOKE_PROXY_INTERFACE_NAME = InvokeProxy.class.getName();
+
+    /**
+     * RPC_REQUEST_CLASS_NAME
+     */
+    public static final String RPC_REQUEST_CLASS_NAME = RpcRequest.class.getName();
+
+    /**
+     * RPC_REQUEST_CLASS_NAME
+     */
+    public static final String RPC_RESPONSE_CLASS_NAME = RpcResponse.class.getName();
 }
