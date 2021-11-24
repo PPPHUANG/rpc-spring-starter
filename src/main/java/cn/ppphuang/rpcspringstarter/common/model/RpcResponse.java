@@ -30,6 +30,11 @@ public class RpcResponse implements Serializable {
         this.rpcStatus = rpcStatus;
     }
 
+    public RpcResponse(Object returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
     public RpcResponse(RpcStatusEnum rpcStatus, Object returnValue) {
         this.rpcStatus = rpcStatus;
         this.returnValue = returnValue;

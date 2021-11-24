@@ -2,6 +2,7 @@ package cn.ppphuang.rpcspringstarter.config;
 
 import cn.ppphuang.rpcspringstarter.annotation.LoadBalanceAno;
 import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.annotation.RpcProcessorAno;
 import cn.ppphuang.rpcspringstarter.annotation.ServerProxyAno;
 import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
@@ -12,6 +13,7 @@ import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
 import cn.ppphuang.rpcspringstarter.server.*;
 import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
+import cn.ppphuang.rpcspringstarter.server.register.DefaultRpcBaseProcessor;
 import cn.ppphuang.rpcspringstarter.server.register.DefaultRpcProcessor;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ZookeeperServerRegister;
@@ -73,10 +75,15 @@ public class RpcAutoConfiguration {
     }
 
     @Bean
-    public DefaultRpcProcessor rpcProcessor(@Autowired ClientProxyFactory clientProxyFactory,
-                                            @Autowired ServerRegister serverRegister,
-                                            @Autowired RpcServer rpcServer) {
-        return new DefaultRpcProcessor(clientProxyFactory, serverRegister, rpcServer);
+    public DefaultRpcBaseProcessor rpcProcessor(@Autowired ClientProxyFactory clientProxyFactory,
+                                                @Autowired ServerRegister serverRegister,
+                                                @Autowired RpcServer rpcServer,
+                                                @Autowired RpcConfig rpcConfig) {
+        DefaultRpcBaseProcessor defaultRpcProcessor = getDefaultRpcProcessor(rpcConfig.getServerProxyType());
+        defaultRpcProcessor.setRpcServer(rpcServer);
+        defaultRpcProcessor.setClientProxyFactory(clientProxyFactory);
+        defaultRpcProcessor.setServerRegister(serverRegister);
+        return defaultRpcProcessor;
     }
 
     public MessageProtocol getMessageProtocol(String name) {
@@ -124,5 +131,17 @@ public class RpcAutoConfiguration {
             }
         }
         throw new RpcException("invalid server proxy config");
+    }
+
+    private DefaultRpcBaseProcessor getDefaultRpcProcessor(String name) {
+        ServiceLoader<DefaultRpcBaseProcessor> processors = ServiceLoader.load(DefaultRpcBaseProcessor.class);
+        for (DefaultRpcBaseProcessor processor : processors) {
+            RpcProcessorAno rp = processor.getClass().getAnnotation(RpcProcessorAno.class);
+            Assert.notNull(rp, "load default rpc base processor can not be empty!");
+            if (name.equals(rp.value())) {
+                return processor;
+            }
+        }
+        throw new RpcException("invalid default rpc base processor config");
     }
 }

@@ -38,7 +38,7 @@ public class RpcConfig {
     /**
      * 服务代理类型 reflect： 反射调用 javassist： 字节码生成代理类调用
      */
-    private String serverProxyType = "reflect";
+    private String serverProxyType = "javassist";
 
     public String getRegisterAddress() {
         return registerAddress;

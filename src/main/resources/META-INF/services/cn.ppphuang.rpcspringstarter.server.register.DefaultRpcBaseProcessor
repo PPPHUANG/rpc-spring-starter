@@ -1,0 +1,2 @@
+cn.ppphuang.rpcspringstarter.server.register.DefaultRpcReflectProcessor
+cn.ppphuang.rpcspringstarter.server.register.DefaultRpcJavassistProcessor

@@ -76,7 +76,7 @@ public class NettyNetClient implements NetClient {
         synchronized (address) {
             if (connectedServerNodes.containsKey(address)) {
                 SendHandlerV2 handlerV2 = connectedServerNodes.get(address);
-                log.info("使用现有连接");
+                log.debug("使用现有连接");
                 return handlerV2.sendRequest(rpcRequest);
             }
         }
@@ -101,7 +101,7 @@ public class NettyNetClient implements NetClient {
             ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
             channelFuture.addListener((ChannelFutureListener) channelFuture1 -> connectedServerNodes.put(address, handler));
         });
-        log.info("使用新的连接。。。");
+        log.debug("使用新的连接。。。");
         return handler.sendRequest(rpcRequest);
     }
 

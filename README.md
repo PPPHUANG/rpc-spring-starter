@@ -4,6 +4,8 @@
 - [x] 服务注册发现
 - [x] 客户端负载均衡
 - [x] Java、ProtoBuf、Kryo序列化
+- [X] Netty增加编解码器
+- [x] 服务端代理模式可配置 支持反射 字节码增强两种实现
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流
@@ -22,6 +24,11 @@ mvn  clean install -DskipTests=true
         <version>0.0.1-SNAPSHOT</version>
     </dependency>
  ```
+
+3. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项
+
+> 注册中心默认zk,默认地址`127.0.0.1:2128`
+
 ## 服务端
 提供远程方法并注入IOC
  ```java
@@ -57,6 +64,3 @@ public class TestService1 {
 }
  ```
 **注意：** 这里的`@Service`是`Spring`的注解。
-
-## 配置
-默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项。

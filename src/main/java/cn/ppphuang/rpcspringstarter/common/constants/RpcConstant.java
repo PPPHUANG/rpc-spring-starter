@@ -4,6 +4,7 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.server.Container;
 import cn.ppphuang.rpcspringstarter.server.InvokeProxy;
+import cn.ppphuang.rpcspringstarter.util.ConvertUtil;
 
 /**
  * @Author: ppphuang
@@ -93,4 +94,20 @@ public class RpcConstant {
      * RPC_REQUEST_CLASS_NAME
      */
     public static final String RPC_RESPONSE_CLASS_NAME = RpcResponse.class.getName();
+
+    /**
+     * CONVERT_UTIL_CLASS_NAME
+     */
+    public static final String CONVERT_UTIL_CLASS_NAME = ConvertUtil.class.getName();
+
+    /**
+     * EXCEPTION_CLASS_NAME
+     */
+    public static final String EXCEPTION_CLASS_NAME = Exception.class.getName();
+
+    /**
+     * OBJECT_CLASS_NAME
+     */
+    public static final String OBJECT_CLASS_NAME = Object.class.getName();
+
 }
