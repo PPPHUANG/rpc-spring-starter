@@ -23,7 +23,7 @@ public class RpcConfig {
     /**
      * 服务协议
      */
-    private String protocol = "java";
+    private String protocol = "kryo";
 
     /**
      * 负载均衡算法
