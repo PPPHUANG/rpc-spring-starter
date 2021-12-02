@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
+import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
 import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ServiceDiscoverer;
@@ -34,6 +35,10 @@ public class ClientProxyFactory {
     private Map<Class<?>, Object> objectCache = new HashMap<>();
 
     private LoadBalance loadBalance;
+
+    private static ThreadLocal<Object> localAsyncContext = new ThreadLocal<>();
+
+    private static ThreadLocal<AsyncReceiveHandler> localAsyncReceiveHandler = new ThreadLocal<>();
 
     public <T> T getProxy(Class<T> clazz) {
         return (T) objectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz)));
@@ -95,6 +100,19 @@ public class ClientProxyFactory {
             }
         }
         return services;
+    }
+
+    public void setLocalAsyncContextAndAsyncReceiveHandler(Object context, AsyncReceiveHandler asyncReceiveHandler) {
+        localAsyncContext.set(context);
+        localAsyncReceiveHandler.set(asyncReceiveHandler);
+    }
+
+    public static AsyncReceiveHandler getAsyncReceiveHandler() {
+        return localAsyncReceiveHandler.get();
+    }
+
+    public static Object getAsyncContext() {
+        return localAsyncContext.get();
     }
 
     public ServiceDiscoverer getServiceDiscoverer() {

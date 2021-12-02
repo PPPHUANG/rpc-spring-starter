@@ -13,6 +13,8 @@ import java.util.Map;
 public class RpcRequest implements Serializable {
     private String requestId;
 
+    private boolean async;
+
     private String serviceName;
 
     private String method;
@@ -29,6 +31,14 @@ public class RpcRequest implements Serializable {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
     }
 
     public String getServiceName() {

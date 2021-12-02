@@ -15,6 +15,8 @@ import java.util.Map;
 public class RpcResponse implements Serializable {
     private String requestId;
 
+    private boolean async;
+
     private Map<String, String> headers = new HashMap<>();
 
     private Object returnValue;
@@ -46,6 +48,14 @@ public class RpcResponse implements Serializable {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
     }
 
     public Map<String, String> getHeaders() {

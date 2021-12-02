@@ -1,5 +1,7 @@
 package cn.ppphuang.rpcspringstarter.client.async;
 
+import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
+
 /**
  * 客户端异步请求回调
  *
@@ -13,8 +15,8 @@ public abstract class AsyncReceiveHandler {
      *
      * @throws Exception
      */
-    public void success() throws Exception {
-        callBack(null, null);
+    public void success(Object context, RpcResponse response) throws Exception {
+        callBack(context, response);
     }
 
     /**

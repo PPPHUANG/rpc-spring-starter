@@ -1,7 +1,5 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.*;
 
 /**
@@ -35,6 +33,7 @@ public class RpcFuture<T> implements Future<T> {
 
     /**
      * 阻塞获取结果
+     *
      * @return
      * @throws InterruptedException
      * @throws ExecutionException

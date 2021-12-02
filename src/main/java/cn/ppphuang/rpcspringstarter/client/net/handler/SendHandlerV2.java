@@ -1,5 +1,7 @@
 package cn.ppphuang.rpcspringstarter.client.net.handler;
 
+import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
+import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
 import cn.ppphuang.rpcspringstarter.client.net.RpcFuture;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
@@ -28,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
     /**
-     * 等待通道简历超时时间
+     * 等待通道建立超时时间
      */
     static final int CHANNEL_WAIT_TIME = 4;
 
@@ -74,6 +76,13 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         ReferenceCountUtil.release(byteBuf);
         RpcResponse rpcResponse = messageProtocol.unmarshallingResponse(response);
         RpcFuture<RpcResponse> rpcResponseRpcFuture = requestMap.get(rpcResponse.getRequestId());
+        //异步处理
+        if (rpcResponse.isAsync()) {
+            Object asyncContext = ClientProxyFactory.getAsyncContext();
+            AsyncReceiveHandler asyncReceiveHandler = ClientProxyFactory.getAsyncReceiveHandler();
+            asyncReceiveHandler.success(asyncContext, rpcResponse);
+        }
+        //TODO 异步处理 返回null值 future可以去掉
         rpcResponseRpcFuture.setResponse(rpcResponse);
     }
 
