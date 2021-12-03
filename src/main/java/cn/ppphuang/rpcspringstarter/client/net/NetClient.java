@@ -14,6 +14,7 @@ import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 public interface NetClient {
     /**
      * 请求接口 返回字节数组
+     *
      * @param data
      * @param service
      * @return
@@ -22,8 +23,9 @@ public interface NetClient {
     byte[] sendRequest(byte[] data, Service service) throws InterruptedException;
 
     /**
-     *请求接口 返回RpcResponse
-     * @param rpcResponse
+     * 请求接口 返回RpcResponse
+     *
+     * @param rpcRequest
      * @param service
      * @param messageProtocol
      * @return

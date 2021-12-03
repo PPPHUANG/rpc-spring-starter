@@ -34,6 +34,8 @@ public class ClientProxyFactory {
 
     private Map<Class<?>, Object> objectCache = new HashMap<>();
 
+    private Map<Class<?>, Object> asyncObjectCache = new HashMap<>();
+
     private LoadBalance loadBalance;
 
     private static ThreadLocal<Object> localAsyncContext = new ThreadLocal<>();
@@ -41,15 +43,26 @@ public class ClientProxyFactory {
     private static ThreadLocal<AsyncReceiveHandler> localAsyncReceiveHandler = new ThreadLocal<>();
 
     public <T> T getProxy(Class<T> clazz) {
-        return (T) objectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz)));
+        return getProxy(clazz, false);
+    }
+
+    public <T> T getProxy(Class<T> clazz, boolean async) {
+        if (async) {
+            return (T) asyncObjectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz, async)));
+        } else {
+            return (T) objectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz, async)));
+        }
     }
 
     private class ClientInvocationHandler implements InvocationHandler {
 
         private Class<?> clazz;
 
-        public ClientInvocationHandler(Class<?> clazz) {
+        private boolean async;
+
+        public ClientInvocationHandler(Class<?> clazz, boolean async) {
             this.clazz = clazz;
+            this.async = async;
         }
 
         @Override
@@ -69,6 +82,7 @@ public class ClientProxyFactory {
             //2. 构建request对象
             RpcRequest rpcRequest = new RpcRequest();
             rpcRequest.setRequestId(UUID.randomUUID().toString());
+            rpcRequest.setAsync(async);
             rpcRequest.setServiceName(service.getName());
             rpcRequest.setMethod(method.getName());
             rpcRequest.setParameters(args);
@@ -80,7 +94,7 @@ public class ClientProxyFactory {
                 throw new RpcException("the response is null");
             }
             if (response.getException() != null) {
-                return response.getException();
+                throw response.getException();
             }
             return response.getReturnValue();
         }
@@ -102,7 +116,7 @@ public class ClientProxyFactory {
         return services;
     }
 
-    public void setLocalAsyncContextAndAsyncReceiveHandler(Object context, AsyncReceiveHandler asyncReceiveHandler) {
+    public static void setLocalAsyncContextAndAsyncReceiveHandler(Object context, AsyncReceiveHandler asyncReceiveHandler) {
         localAsyncContext.set(context);
         localAsyncReceiveHandler.set(asyncReceiveHandler);
     }

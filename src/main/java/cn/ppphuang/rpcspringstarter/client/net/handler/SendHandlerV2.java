@@ -4,6 +4,7 @@ import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
 import cn.ppphuang.rpcspringstarter.client.net.RpcFuture;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
@@ -78,12 +79,21 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         RpcFuture<RpcResponse> rpcResponseRpcFuture = requestMap.get(rpcResponse.getRequestId());
         //异步处理
         if (rpcResponse.isAsync()) {
-            Object asyncContext = ClientProxyFactory.getAsyncContext();
-            AsyncReceiveHandler asyncReceiveHandler = ClientProxyFactory.getAsyncReceiveHandler();
-            asyncReceiveHandler.success(asyncContext, rpcResponse);
+            AsyncReceiveHandler asyncReceiveHandler = rpcResponseRpcFuture.getAsyncReceiveHandler();
+            Object asyncContext = rpcResponseRpcFuture.getAsyncContext();
+            log.debug("asyncReceiveHandler:{}", asyncReceiveHandler);
+            log.debug("asyncContext:{}", asyncContext);
+            try {
+                asyncReceiveHandler.success(asyncContext, rpcResponse);
+            } catch (Exception e) {
+                throw new RpcException("asyncReceiveHandler success method invoke error :" + e.getMessage());
+            } finally {
+                requestMap.remove(rpcResponse.getRequestId());
+                log.debug("requestMap remove:{}", rpcResponse.getRequestId());
+            }
+        } else {
+            rpcResponseRpcFuture.setResponse(rpcResponse);
         }
-        //TODO 异步处理 返回null值 future可以去掉
-        rpcResponseRpcFuture.setResponse(rpcResponse);
     }
 
     @Override
@@ -111,6 +121,14 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
     }
 
     public RpcResponse sendRequest(RpcRequest request) {
+        if (request.isAsync()) {
+            return sendAsyncRequest(request);
+        } else {
+            return sendSyncRequest(request);
+        }
+    }
+
+    public RpcResponse sendSyncRequest(RpcRequest request) {
         RpcResponse response;
         RpcFuture<RpcResponse> responseFuture = new RpcFuture<>();
         requestMap.put(request.getRequestId(), responseFuture);
@@ -128,7 +146,39 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         } catch (Exception e) {
             throw new RpcException(e.getMessage());
         } finally {
+            log.debug("requestMap remove:{}", request.getRequestId());
             requestMap.remove(request.getRequestId());
+        }
+        return response;
+    }
+
+    public RpcResponse sendAsyncRequest(RpcRequest request) {
+        RpcResponse response = new RpcResponse();
+        RpcFuture<RpcResponse> responseFuture = new RpcFuture<>();
+        Object asyncContext = ClientProxyFactory.getAsyncContext();
+        AsyncReceiveHandler asyncReceiveHandler = ClientProxyFactory.getAsyncReceiveHandler();
+        responseFuture.setAsyncReceiveHandler(asyncReceiveHandler);
+        responseFuture.setAsyncContext(asyncContext);
+        requestMap.put(request.getRequestId(), responseFuture);
+        try {
+            byte[] data = messageProtocol.marshallingRequest(request);
+            ByteBuf buffer = Unpooled.buffer(data.length);
+            buffer.writeBytes(data);
+            if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
+                channel.writeAndFlush(buffer);
+                response.setAsync(request.isAsync());
+                response.setRequestId(request.getRequestId());
+                response.setReturnValue(null);
+                response.setRpcStatus(RpcStatusEnum.SUCCESS);
+            } else {
+                requestMap.remove(request.getRequestId());
+                log.debug("requestMap remove:{}", request.getRequestId());
+                throw new RpcException("establish channel time out");
+            }
+        } catch (Exception e) {
+            requestMap.remove(request.getRequestId());
+            log.debug("requestMap remove:{}", request.getRequestId());
+            throw new RpcException(e.getMessage());
         }
         return response;
     }

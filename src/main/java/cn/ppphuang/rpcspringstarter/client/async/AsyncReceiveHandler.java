@@ -1,6 +1,7 @@
 package cn.ppphuang.rpcspringstarter.client.async;
 
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 客户端异步请求回调
@@ -8,15 +9,20 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
  * @Author: ppphuang
  * @Create: 2021/12/01
  */
+@Slf4j
 public abstract class AsyncReceiveHandler {
 
     /**
-     * 客户端接收到请求之后，调用此方法
+     * 客户端接收到响应之后，调用此方法
      *
      * @throws Exception
      */
     public void success(Object context, RpcResponse response) throws Exception {
-        callBack(context, response);
+        AsyncCallBackExecutor.execute(() -> {
+            log.debug("AsyncReceiveHandler success context:{} response:{}", context, response);
+            //todo
+            callBack(context, response.getReturnValue());
+        });
     }
 
     /**

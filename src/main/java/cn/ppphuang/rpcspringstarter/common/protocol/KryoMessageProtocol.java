@@ -27,6 +27,7 @@ public class KryoMessageProtocol implements MessageProtocol {
         @Override
         protected Kryo initialValue() {
             Kryo kryo = new Kryo();
+            kryo.setRegistrationRequired(false);
             kryo.setReferences(false);
             kryo.register(RpcRequest.class);
             kryo.register(RpcResponse.class);

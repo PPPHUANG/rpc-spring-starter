@@ -1,5 +1,7 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
+import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
+
 import java.util.concurrent.*;
 
 /**
@@ -12,9 +14,22 @@ public class RpcFuture<T> implements Future<T> {
 
     private T response;
 
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
+    private AsyncReceiveHandler asyncReceiveHandler;
+
+    private Object asyncContext;
+
+    private CountDownLatch countDownLatch;
 
     private long beginTime = System.currentTimeMillis();
+
+    public RpcFuture() {
+        this.countDownLatch = new CountDownLatch(1);
+    }
+
+    public RpcFuture(AsyncReceiveHandler asyncReceiveHandler, Object asyncContext) {
+        this.asyncReceiveHandler = asyncReceiveHandler;
+        this.asyncContext = asyncContext;
+    }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -59,5 +74,21 @@ public class RpcFuture<T> implements Future<T> {
 
     public long getBeginTime() {
         return beginTime;
+    }
+
+    public AsyncReceiveHandler getAsyncReceiveHandler() {
+        return asyncReceiveHandler;
+    }
+
+    public void setAsyncReceiveHandler(AsyncReceiveHandler asyncReceiveHandler) {
+        this.asyncReceiveHandler = asyncReceiveHandler;
+    }
+
+    public Object getAsyncContext() {
+        return asyncContext;
+    }
+
+    public void setAsyncContext(Object asyncContext) {
+        this.asyncContext = asyncContext;
     }
 }

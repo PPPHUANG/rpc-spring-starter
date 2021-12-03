@@ -47,6 +47,7 @@ public abstract class RequestBaseHandler {
         }
         //响应
         response.setRequestId(request.getRequestId());
+        response.setAsync(request.isAsync());
         return protocol.marshallingResponse(response);
     }
 
