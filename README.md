@@ -1,23 +1,27 @@
 # rpc-spring-starter
+
+> 基于Netty的RPC框架
+
 ## TODO
+
 - [X] Netty通讯
-- [x] 服务注册发现
+- [x] 基于ZK的服务注册发现
 - [x] 客户端负载均衡
-- [x] Java、ProtoBuf、Kryo序列化
-- [X] Netty增加编解码器
-- [x] 服务端代理模式可配置 支持反射 字节码增强两种实现
-- [x] 异步调用支持
+- [x] 支持Java、ProtoBuf、Kryo序列化
+- [X] 增加Netty编解码器
+- [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强
+- [x] 支持异步调用
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
-- [ ] 调用限流
-- [ ] 调用降级、熔断
-- [ ] 灰度支持
+- [ ] 调用限流、熔断、降级
+- [ ] 支持灰度
 
-1. 本地install
+1. 克隆本项目到本地install。
 ```bash
 mvn  clean install -DskipTests=true
 ```
-2. 添加maven依赖到你的`SpringBoot`项目中
+
+2. 添加maven依赖到你的`SpringBoot`项目中。
  ```xml
    <dependency>
         <groupId>cn.ppphuang</groupId>
@@ -26,7 +30,7 @@ mvn  clean install -DskipTests=true
     </dependency>
  ```
 
-3. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项
+3. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项。
 
 ```properties
 #注册中心地址
@@ -44,7 +48,17 @@ hp.rpc.weight=1
 ```
 
 ## 服务端
-提供远程方法并注入IOC
+
+1. 定义服务接口。
+
+```java
+public interface HelloService {
+    String hello(String name);
+}
+```
+
+2. 实现服务接口并通过`@Service`注解发布服务。
+
  ```java
 import cn.ppphuang.rpcspringstarter.annotation.Service;
 import cn.ppphuang.rpcspringstarter.service.HelloService;
@@ -65,7 +79,7 @@ public class HelloServiceImpl implements HelloService {
 
 ### 同步调用
 
-1. 使用`@InjectService`注解注入远程方法。
+1. 使用`@InjectService`注解注入远程服务。
 
  ```java
 import cn.ppphuang.rpcspringstarter.annotation.InjectService;
@@ -85,7 +99,7 @@ public class TestService1 {
 
 **注意：** 这里的`@Service`是`Spring`的注解。
 
-2. 活动获取代理对象。
+2. 手动获取代理对象。
 
 ```java
 class RpcSpringStarterApplicationTests {
