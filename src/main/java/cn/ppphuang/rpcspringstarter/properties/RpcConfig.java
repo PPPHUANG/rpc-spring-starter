@@ -10,6 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "hp.rpc")
 public class RpcConfig {
+
+    /**
+     * 是否启用rpc 默认启用
+     */
+    private boolean enable = true;
+
     /**
      * 注册中心地址
      */
@@ -39,6 +45,14 @@ public class RpcConfig {
      * 服务代理类型 reflect： 反射调用 javassist： 字节码生成代理类调用
      */
     private String serverProxyType = "javassist";
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     public String getRegisterAddress() {
         return registerAddress;

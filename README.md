@@ -33,6 +33,8 @@ mvn  clean install -DskipTests=true
 3. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项。
 
 ```properties
+#是否启用rpc 默认启用
+hp.rpc.enable=true
 #注册中心地址
 hp.rpc.register-address=127.0.0.1:2128
 #服务暴露端口

@@ -6,6 +6,7 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ServiceObject;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 请求处理handler
@@ -13,6 +14,7 @@ import cn.ppphuang.rpcspringstarter.server.register.ServiceObject;
  * @Author: ppphuang
  * @Create: 2021/9/10
  */
+@Slf4j
 public abstract class RequestBaseHandler {
 
     private MessageProtocol protocol;
@@ -30,6 +32,7 @@ public abstract class RequestBaseHandler {
     public byte[] handleRequest(byte[] data) throws Exception {
         //1. 解组消息
         RpcRequest request = protocol.unmarshallingRequest(data);
+        log.debug("the server receives encode message :{}", request);
         //2. 查找服务对象
         ServiceObject serviceObject = serverRegister.getServiceObject(request.getServiceName());
         RpcResponse response = null;

@@ -35,7 +35,7 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyRpcServer.THREAD_POOL.submit(() -> {
             try {
-                log.debug("the server receives message :{}", msg);
+                log.debug("the server receives decode message :{}", msg);
                 ByteBuf byteBuf = (ByteBuf) msg;
                 byte[] bytes = new byte[byteBuf.readableBytes()];
                 byteBuf.readBytes(bytes);

@@ -14,10 +14,10 @@ import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
 import cn.ppphuang.rpcspringstarter.server.*;
 import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
 import cn.ppphuang.rpcspringstarter.server.register.DefaultRpcBaseProcessor;
-import cn.ppphuang.rpcspringstarter.server.register.DefaultRpcProcessor;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ZookeeperServerRegister;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,12 +35,8 @@ import java.util.ServiceLoader;
  */
 @Configuration
 @EnableConfigurationProperties(RpcConfig.class)
+@ConditionalOnProperty(prefix = "hp.rpc", name = "enable", havingValue = "true", matchIfMissing = true)
 public class RpcAutoConfiguration {
-    @Bean
-    public RpcConfig rpcConfig() {
-        return new RpcConfig();
-    }
-
     @Bean
     public ServerRegister serverRegister(@Autowired RpcConfig rpcConfig) {
         return new ZookeeperServerRegister(rpcConfig.getRegisterAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.getWeight());
