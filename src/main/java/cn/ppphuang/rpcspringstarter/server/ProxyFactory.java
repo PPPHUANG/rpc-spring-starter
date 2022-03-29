@@ -71,6 +71,9 @@ public class ProxyFactory {
             sb.append(" && (");
             sb.append("params[");
             sb.append(j);
+            sb.append("] == null ||");
+            sb.append("params[");
+            sb.append(j);
             sb.append("].getClass().getSimpleName().equalsIgnoreCase(\"");
             sb.append(paraName);
             sb.append("\")");
@@ -192,7 +195,7 @@ public class ProxyFactory {
         }
         sb.append(");");
         if (!"void".equalsIgnoreCase(returnValueType)) {
-            sb.append("return returnValue;");
+            sb.append(getReturn(returnValueType));
         } else {
             sb.append("return null;");
         }
@@ -201,6 +204,36 @@ public class ProxyFactory {
         sb.append("}");
         log.debug("method({}) source code:{}", proxyClass.getName() + method.getName(), sb);
         return sb.toString();
+    }
+
+    /**
+     * 解决基本类型返回时的报错
+     * Type integer (current frame, stack[0]) is not assignable to 'java/lang/Object' (from method signature)
+     *
+     * @param returnValueType
+     * @return
+     */
+    private static String getReturn(String returnValueType) {
+        switch (returnValueType) {
+            case "int":
+                return "return new Integer(returnValue);";
+            case "boolean":
+                return "return new Boolean(returnValue);";
+            case "long":
+                return "return new Long(returnValue);";
+            case "double":
+                return "return new Double(returnValue);";
+            case "float":
+                return "return new Float(returnValue);";
+            case "short":
+                return "return new Short(returnValue);";
+            case "byte":
+                return "return new Byte(returnValue);";
+            case "char":
+                return "return new Character(returnValue);";
+            default:
+                return "return returnValue;";
+        }
     }
 
     private static String makeProxyFiled(String interfaceName, String springBeanName) {

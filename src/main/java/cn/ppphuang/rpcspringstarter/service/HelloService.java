@@ -8,10 +8,33 @@ package cn.ppphuang.rpcspringstarter.service;
  */
 public interface HelloService {
     /**
-     * say hello
-     *
-     * @param name
+     * @param name String
+     * @param age  age
+     * @return age
+     */
+    String hello(String name, Integer age);
+
+    /**
+     * @param age
      * @return
      */
-    String hello(String name);
+    Integer helloInteger(Integer age);
+
+    /**
+     * @param age int
+     * @return int
+     */
+    int helloInt(int age);
+
+    /**
+     * @param age age
+     * @return byte
+     */
+    byte helloByte(byte age);
+
+    /**
+     * @param age Boolean
+     * @return boolean
+     */
+    boolean helloBoolean(Boolean age);
 }
