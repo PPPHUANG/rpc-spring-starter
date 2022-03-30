@@ -15,6 +15,12 @@ public interface HelloService {
     String hello(String name, Integer age);
 
     /**
+     * @param name String
+     * @return age
+     */
+    String hello(String name);
+
+    /**
      * @param age
      * @return
      */
