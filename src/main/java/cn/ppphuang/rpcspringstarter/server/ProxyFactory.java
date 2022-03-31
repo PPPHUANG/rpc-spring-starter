@@ -191,7 +191,7 @@ public class ProxyFactory {
             //define returnValue
             Class<?> classReturn = method.getReturnType();
             Type typeReturn = method.getGenericReturnType();
-            String returnValueType = typeReturn.toString().replaceFirst("class ", "");
+            String returnValueType = typeReturn.getTypeName().replaceFirst("class ", "");
             if (returnValueType.startsWith("[")) {
                 returnValueType = classReturn.getCanonicalName();
             }

@@ -1,5 +1,7 @@
 package cn.ppphuang.rpcspringstarter.service;
 
+import java.util.List;
+
 /**
  * 测试服务接口
  *
@@ -43,4 +45,17 @@ public interface HelloService {
      * @return boolean
      */
     boolean helloBoolean(Boolean age);
+
+    /**
+     * @param name String
+     * @param age  Integer
+     * @return Result<Person>
+     */
+    Result<List<Person>> helloPerson(String name, Integer age);
+
+    /**
+     * @param age Integer
+     * @return List<Integer>
+     */
+    List<Integer> helloList(Integer age);
 }
