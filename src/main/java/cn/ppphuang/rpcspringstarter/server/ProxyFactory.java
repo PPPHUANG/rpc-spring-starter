@@ -68,7 +68,7 @@ public class ProxyFactory {
 
     private static String makeMethodString(CtClass proxyClass, Method[] methods, String uniqueMethodName) {
         StringBuilder sb = new StringBuilder();
-        sb.append("public ").append(RpcConstant.OBJECT_CLASS_NAME).append(" ");
+        sb.append("public ").append(RpcConstant.RPC_RESPONSE_CLASS_NAME).append(" ");
         sb.append(uniqueMethodName);
         sb.append("(" + RpcConstant.RPC_REQUEST_CLASS_NAME + " request) throws " + RpcConstant.EXCEPTION_CLASS_NAME + " {");
         sb.append(RpcConstant.OBJECT_CLASS_NAME + "[] params = " + "request.getParameters();");
@@ -212,7 +212,7 @@ public class ProxyFactory {
             }
             sb.append(");");
             if (!"void".equalsIgnoreCase(returnValueType)) {
-                sb.append(getReturn(returnValueType));
+                sb.append("return new ").append(RpcConstant.RPC_RESPONSE_CLASS_NAME).append("(returnValue);");
             } else {
                 sb.append("return null;");
             }
@@ -223,36 +223,6 @@ public class ProxyFactory {
         sb.append("}");
         log.debug("method({}) source code:{}", proxyClass.getName() + uniqueMethodName, sb);
         return sb.toString();
-    }
-
-    /**
-     * 解决基本类型返回时的报错
-     * Type integer (current frame, stack[0]) is not assignable to 'java/lang/Object' (from method signature)
-     *
-     * @param returnValueType
-     * @return
-     */
-    private static String getReturn(String returnValueType) {
-        switch (returnValueType) {
-            case "int":
-                return "return new Integer(returnValue);";
-            case "boolean":
-                return "return new Boolean(returnValue);";
-            case "long":
-                return "return new Long(returnValue);";
-            case "double":
-                return "return new Double(returnValue);";
-            case "float":
-                return "return new Float(returnValue);";
-            case "short":
-                return "return new Short(returnValue);";
-            case "byte":
-                return "return new Byte(returnValue);";
-            case "char":
-                return "return new Character(returnValue);";
-            default:
-                return "return returnValue;";
-        }
     }
 
     private static String makeProxyFiled(String interfaceName, String springBeanName) {
@@ -281,10 +251,10 @@ public class ProxyFactory {
             sb.append(objectName + " returnValue = ");
             sb.append(methodName);
             sb.append("(request);");
-            sb.append("return new " + RpcConstant.RPC_RESPONSE_CLASS_NAME + "(returnValue);");
+            sb.append("return returnValue;");
             sb.append("}");
         }
-        sb.append("throw new " + exceptionName + "(\"method:" + proxyClass.getName() + ".invoke--msg:not found method (\"+methodName+\")\");");
+        sb.append("throw new ").append(exceptionName).append("(\"method:").append(proxyClass.getName()).append(".invoke--msg:not found method (\"+methodName+\")\");");
         sb.append("}");
         log.debug("{}:invoke source code:{}", proxyClass.getName(), sb);
         return sb.toString();

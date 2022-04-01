@@ -8,6 +8,8 @@ import java.util.Map;
 
 /**
  * 响应类
+ * javassist代理类中不支持自动拆装箱，需要基本类型对应的构造方法
+ * 自动拆装箱是JDK编译器语法糖，javassist是运行时，没有JDK编译过程
  *
  * @Author: ppphuang
  * @Create: 2021/9/9
@@ -33,6 +35,46 @@ public class RpcResponse implements Serializable {
     }
 
     public RpcResponse(Object returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(int returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(long returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(short returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(double returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(float returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(byte returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(char returnValue) {
+        this.rpcStatus = RpcStatusEnum.SUCCESS;
+        this.returnValue = returnValue;
+    }
+
+    public RpcResponse(boolean returnValue) {
         this.rpcStatus = RpcStatusEnum.SUCCESS;
         this.returnValue = returnValue;
     }
