@@ -32,6 +32,16 @@ public class RpcConfig {
     private String protocol = "kryo";
 
     /**
+     * 压缩算法
+     */
+    private String compress = "Gzip";
+
+    /**
+     * 服务是否启用压缩算法
+     */
+    private boolean enableCompress = false;
+
+    /**
      * 负载均衡算法
      */
     private String loadBalance = "random";
@@ -52,6 +62,14 @@ public class RpcConfig {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public boolean isEnableCompress() {
+        return enableCompress;
+    }
+
+    public void setEnableCompress(boolean enableCompress) {
+        this.enableCompress = enableCompress;
     }
 
     public String getRegisterAddress() {
@@ -100,5 +118,13 @@ public class RpcConfig {
 
     public void setServerProxyType(String serverProxyType) {
         this.serverProxyType = serverProxyType;
+    }
+
+    public String getCompress() {
+        return compress;
+    }
+
+    public void setCompress(String compress) {
+        this.compress = compress;
     }
 }

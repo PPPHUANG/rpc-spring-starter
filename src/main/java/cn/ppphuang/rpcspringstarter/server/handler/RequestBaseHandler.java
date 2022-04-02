@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.server.handler;
 
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
@@ -18,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class RequestBaseHandler {
 
     private MessageProtocol protocol;
+
+    private Compresser compresser;
 
     private ServerRegister serverRegister;
 
@@ -75,5 +78,13 @@ public abstract class RequestBaseHandler {
 
     public void setServerRegister(ServerRegister serverRegister) {
         this.serverRegister = serverRegister;
+    }
+
+    public Compresser getCompresser() {
+        return compresser;
+    }
+
+    public void setCompresser(Compresser compresser) {
+        this.compresser = compresser;
     }
 }

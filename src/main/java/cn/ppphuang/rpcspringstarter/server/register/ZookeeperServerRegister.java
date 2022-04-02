@@ -22,11 +22,12 @@ public class ZookeeperServerRegister extends DefaultServerRegisrer {
 
     private ZkClient zkClient;
 
-    public ZookeeperServerRegister(String zkAddress, Integer port, String protocol, Integer weight) {
+    public ZookeeperServerRegister(String zkAddress, Integer port, String protocol, String compress, Integer weight) {
         zkClient = new ZkClient(zkAddress);
         zkClient.setZkSerializer(new ZookeeperSerializer());
         this.port = port;
         this.protocol = protocol;
+        this.compress = compress;
         this.weight = weight;
     }
 
@@ -40,6 +41,7 @@ public class ZookeeperServerRegister extends DefaultServerRegisrer {
         service.setName(so.getName());
         service.setProtocol(protocol);
         service.setWeight(weight);
+        service.setCompress(compress);
         exportService(service);
     }
 

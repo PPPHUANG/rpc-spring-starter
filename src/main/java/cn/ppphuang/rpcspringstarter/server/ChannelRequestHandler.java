@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.server;
 
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,7 +42,10 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
                 byteBuf.readBytes(bytes);
                 //回收ByteBuf
                 ReferenceCountUtil.release(byteBuf);
+                Compresser compresser = requestHandler.getCompresser();
+                bytes = compresser == null ? bytes : compresser.decompress(bytes);
                 byte[] resp = requestHandler.handleRequest(bytes);
+                resp = compresser == null ? resp : compresser.compress(resp);
                 ByteBuf respBuffer = Unpooled.buffer(resp.length);
                 respBuffer.writeBytes(resp);
                 log.debug("Send Response:{}", respBuffer);

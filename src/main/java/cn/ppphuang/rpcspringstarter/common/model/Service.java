@@ -18,6 +18,11 @@ public class Service {
     private String protocol;
 
     /**
+     * 压缩协议
+     */
+    private String compress;
+
+    /**
      * 服务地址, ip:port
      */
     private String address;
@@ -59,11 +64,20 @@ public class Service {
         this.weight = weight;
     }
 
+    public String getCompress() {
+        return compress;
+    }
+
+    public void setCompress(String compress) {
+        this.compress = compress;
+    }
+
     @Override
     public String toString() {
         return "Service{" +
                 "name='" + name + '\'' +
                 ", protocol='" + protocol + '\'' +
+                ", compress='" + compress + '\'' +
                 ", address='" + address + '\'' +
                 ", weight=" + weight +
                 '}';
@@ -74,14 +88,11 @@ public class Service {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Service service = (Service) o;
-        return Objects.equals(name, service.name) &&
-                Objects.equals(protocol, service.protocol) &&
-                Objects.equals(address, service.address) &&
-                Objects.equals(weight, service.weight);
+        return name.equals(service.name) && protocol.equals(service.protocol) && compress.equals(service.compress) && address.equals(service.address) && weight.equals(service.weight);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, protocol, address, weight);
+        return Objects.hash(name, protocol, compress, address, weight);
     }
 }

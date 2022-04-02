@@ -15,6 +15,8 @@ public abstract class DefaultServerRegisrer implements ServerRegister {
 
     protected String protocol;
 
+    protected String compress;
+
     protected Integer port;
 
     /**

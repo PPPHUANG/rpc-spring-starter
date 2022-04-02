@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
@@ -28,7 +29,8 @@ public interface NetClient {
      * @param rpcRequest
      * @param service
      * @param messageProtocol
+     * @param compresser
      * @return
      */
-    RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol);
+    RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol, Compresser compresser);
 }

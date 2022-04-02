@@ -1,13 +1,11 @@
 package cn.ppphuang.rpcspringstarter.config;
 
-import cn.ppphuang.rpcspringstarter.annotation.LoadBalanceAno;
-import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
-import cn.ppphuang.rpcspringstarter.annotation.RpcProcessorAno;
-import cn.ppphuang.rpcspringstarter.annotation.ServerProxyAno;
+import cn.ppphuang.rpcspringstarter.annotation.*;
 import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
@@ -39,7 +37,7 @@ import java.util.ServiceLoader;
 public class RpcAutoConfiguration {
     @Bean
     public ServerRegister serverRegister(@Autowired RpcConfig rpcConfig) {
-        return new ZookeeperServerRegister(rpcConfig.getRegisterAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.getWeight());
+        return new ZookeeperServerRegister(rpcConfig.getRegisterAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.isEnableCompress() ? rpcConfig.getCompress() : null, rpcConfig.getWeight());
     }
 
     @Bean
@@ -47,6 +45,7 @@ public class RpcAutoConfiguration {
         RequestBaseHandler requestHandler = getRequestHandler(rpcConfig.getServerProxyType());
         requestHandler.setServerRegister(serverRegister);
         requestHandler.setProtocol(getMessageProtocol(rpcConfig.getProtocol()));
+        requestHandler.setCompresser(rpcConfig.isEnableCompress() ? getCompresser(rpcConfig.getCompress()) : null);
         return requestHandler;
     }
 
@@ -63,6 +62,9 @@ public class RpcAutoConfiguration {
         //setSupportMessageProtocols
         Map<String, MessageProtocol> supportMessageProtocol = buildSupportMessageProtocol();
         clientProxyFactory.setSupportMessageProtocols(supportMessageProtocol);
+        //setSupportCompresser
+        Map<String, Compresser> supportCompresser = buildSupportCompresser();
+        clientProxyFactory.setSupportCompressers(supportCompresser);
         LoadBalance loadBalance = getLoadBalance(rpcConfig.getLoadBalance());
         clientProxyFactory.setLoadBalance(loadBalance);
         clientProxyFactory.setNetClient(new NettyNetClient());
@@ -103,6 +105,30 @@ public class RpcAutoConfiguration {
             supportMessageProtocol.put(annotation.value(), messageProtocol);
         }
         return supportMessageProtocol;
+    }
+
+
+    public Compresser getCompresser(String name) {
+        ServiceLoader<Compresser> loader = ServiceLoader.load(Compresser.class);
+        for (Compresser compresser : loader) {
+            CompresserAno annotation = compresser.getClass().getAnnotation(CompresserAno.class);
+            Assert.notNull(annotation, "compress name can not be empty!");
+            if (name.equals(annotation.value())) {
+                return compresser;
+            }
+        }
+        throw new RpcException("invalid compress config!");
+    }
+
+    public Map<String, Compresser> buildSupportCompresser() {
+        HashMap<String, Compresser> supportCompresser = new HashMap<>();
+        ServiceLoader<Compresser> loader = ServiceLoader.load(Compresser.class);
+        for (Compresser messageProtocol : loader) {
+            CompresserAno compresser = messageProtocol.getClass().getAnnotation(CompresserAno.class);
+            Assert.notNull(compresser, "compress name can not be empty!");
+            supportCompresser.put(compresser.value(), messageProtocol);
+        }
+        return supportCompresser;
     }
 
     private LoadBalance getLoadBalance(String name) {

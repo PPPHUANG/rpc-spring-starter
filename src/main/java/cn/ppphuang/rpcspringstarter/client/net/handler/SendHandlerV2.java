@@ -4,6 +4,7 @@ import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
 import cn.ppphuang.rpcspringstarter.client.net.RpcFuture;
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
@@ -48,11 +49,14 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
 
     private MessageProtocol messageProtocol;
 
+    private Compresser compresser;
+
     private CountDownLatch latch = new CountDownLatch(1);
 
-    public SendHandlerV2(String remoteAddress, MessageProtocol messageProtocol) {
+    public SendHandlerV2(String remoteAddress, MessageProtocol messageProtocol, Compresser compresser) {
         this.remoteAddress = remoteAddress;
         this.messageProtocol = messageProtocol;
+        this.compresser = compresser;
     }
 
     @Override
@@ -72,9 +76,10 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         byte[] response = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(response);
-        log.debug("Client read string message:{}", new String(response));
         //手动回收
         ReferenceCountUtil.release(byteBuf);
+        response = decompress(response);
+        log.debug("Client read string message:{}", new String(response));
         RpcResponse rpcResponse = messageProtocol.unmarshallingResponse(response);
         RpcFuture<RpcResponse> rpcResponseRpcFuture = requestMap.get(rpcResponse.getRequestId());
         //异步处理
@@ -134,6 +139,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         requestMap.put(request.getRequestId(), responseFuture);
         try {
             byte[] data = messageProtocol.marshallingRequest(request);
+            data = compress(data);
             ByteBuf buffer = Unpooled.buffer(data.length);
             buffer.writeBytes(data);
             if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
@@ -162,6 +168,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         requestMap.put(request.getRequestId(), responseFuture);
         try {
             byte[] data = messageProtocol.marshallingRequest(request);
+            data = compress(data);
             ByteBuf buffer = Unpooled.buffer(data.length);
             buffer.writeBytes(data);
             if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
@@ -181,5 +188,13 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
             throw new RpcException(e.getMessage());
         }
         return response;
+    }
+
+    public byte[] compress(byte[] data) {
+        return compresser == null ? data : compresser.compress(data);
+    }
+
+    public byte[] decompress(byte[] data) {
+        return compresser == null ? data : compresser.decompress(data);
     }
 }

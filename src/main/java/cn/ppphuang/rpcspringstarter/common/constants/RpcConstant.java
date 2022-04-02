@@ -46,6 +46,11 @@ public class RpcConstant {
     public static final String PROTOCOL_KRYO = "kryo";
 
     /**
+     * 解压缩算法
+     */
+    public static final String COMPRESS_GZIP = "Gzip";
+
+    /**
      * 客户端随机负载均衡
      */
     public static final String BALANCE_RANDOM = "random";

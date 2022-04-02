@@ -11,6 +11,8 @@
 - [X] 增加Netty编解码器
 - [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强
 - [x] 支持异步调用
+- [x] 支持Gzip压缩
+- [ ] 支持服务分组与服务版本
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流、熔断、降级
@@ -30,7 +32,9 @@ mvn  clean install -DskipTests=true
     </dependency>
  ```
 
-3. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项。
+3. 启动ZK。
+
+4. 默认配置项在`RpcConfig`类中，可以通过`application.properties`来覆盖需要修改的配置项。
 
 ```properties
 #是否启用rpc 默认启用
@@ -43,6 +47,10 @@ hp.rpc.server-port=9999
 hp.rpc.load-balance=random
 #序列化协议 默认：kryo, 可选 kryo 、 java 、 protobuf
 hp.rpc.protocol=kryo
+#服务是否启用压缩算法 默认：false
+hp.rpc.enable-compress=false
+#压缩算法 默认：Gzip, 目前可选 Gzip
+hp.rpc.compress=Gzip
 #服务代理类型 默认：javassist， 可选 reflect 反射调用、 javassist 字节码生成代理类调用
 hp.rpc.server-proxy-type=javassist
 #服务权重

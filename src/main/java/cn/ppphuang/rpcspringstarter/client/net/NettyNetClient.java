@@ -3,6 +3,7 @@ package cn.ppphuang.rpcspringstarter.client.net;
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandler;
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandlerV2;
 import cn.ppphuang.rpcspringstarter.common.codec.LengthEncoder;
+import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
@@ -71,7 +72,7 @@ public class NettyNetClient implements NetClient {
     }
 
     @Override
-    public RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol) {
+    public RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol, Compresser compresser) {
         String address = service.getAddress();
         synchronized (address) {
             if (connectedServerNodes.containsKey(address)) {
@@ -83,7 +84,7 @@ public class NettyNetClient implements NetClient {
         String[] addressInfo = address.split(":");
         final String serverAddress = addressInfo[0];
         final String serverPort = addressInfo[1];
-        final SendHandlerV2 handler = new SendHandlerV2(address, messageProtocol);
+        final SendHandlerV2 handler = new SendHandlerV2(address, messageProtocol, compresser);
         threadPool.submit(() -> {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(loopGroup).channel(NioSocketChannel.class)
