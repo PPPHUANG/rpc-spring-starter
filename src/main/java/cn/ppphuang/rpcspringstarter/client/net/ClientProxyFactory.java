@@ -5,11 +5,13 @@ import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ServiceDiscoverer;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -26,6 +28,7 @@ import java.util.UUID;
  * @Author: ppphuang
  * @Create: 2021/9/9
  */
+@Slf4j
 public class ClientProxyFactory {
     private ServiceDiscoverer serviceDiscoverer;
 
@@ -115,6 +118,9 @@ public class ClientProxyFactory {
             }
             if (response.getException() != null) {
                 throw response.getException();
+            }
+            if (!RpcStatusEnum.SUCCESS.equals(response.getRpcStatus())) {
+                log.info("the request is not successful, request:{} response:{}", rpcRequest, response);
             }
             return response.getReturnValue();
         }

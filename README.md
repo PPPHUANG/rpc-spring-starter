@@ -214,6 +214,12 @@ public class TestCallBackHandler extends AsyncReceiveHandler {
         System.out.println(context);
         System.out.println(result);
     }
+    
+    @Override
+    public void onException(Object context, Object result, Exception e) {
+        System.out.println(context);
+        System.out.println(result);
+    }
 }
 ```
 

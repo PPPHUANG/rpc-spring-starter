@@ -20,8 +20,11 @@ public abstract class AsyncReceiveHandler {
     public void success(Object context, RpcResponse response) throws Exception {
         AsyncCallBackExecutor.execute(() -> {
             log.debug("AsyncReceiveHandler success context:{} response:{}", context, response);
-            //todo
-            callBack(context, response.getReturnValue());
+            try {
+                callBack(context, response.getReturnValue());
+            } catch (Exception e) {
+                onException(context, response.getReturnValue(), e);
+            }
         });
     }
 
@@ -32,4 +35,13 @@ public abstract class AsyncReceiveHandler {
      * @param result
      */
     public abstract void callBack(Object context, Object result);
+
+    /**
+     * 重写此方法，可以在callBack中自行处理业务处理异常，也可以重新此方法兜底处理
+     *
+     * @param context
+     * @param result
+     * @param e
+     */
+    public abstract void onException(Object context, Object result, Exception e);
 }

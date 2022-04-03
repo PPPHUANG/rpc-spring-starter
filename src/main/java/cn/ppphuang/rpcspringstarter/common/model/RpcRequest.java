@@ -1,6 +1,7 @@
 package cn.ppphuang.rpcspringstarter.common.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,5 +100,20 @@ public class RpcRequest implements Serializable {
 
     public void setParameters(Object[] parameters) {
         this.parameters = parameters;
+    }
+
+    @Override
+    public String toString() {
+        return "RpcRequest{" +
+                "requestId='" + requestId + '\'' +
+                ", async=" + async +
+                ", serviceName='" + serviceName + '\'' +
+                ", method='" + method + '\'' +
+                ", group='" + group + '\'' +
+                ", version='" + version + '\'' +
+                ", headers=" + headers +
+                ", parametersTypes=" + Arrays.toString(parametersTypes) +
+                ", parameters=" + Arrays.toString(parameters) +
+                '}';
     }
 }

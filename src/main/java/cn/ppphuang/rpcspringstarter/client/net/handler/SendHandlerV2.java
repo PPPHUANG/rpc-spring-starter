@@ -91,7 +91,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
             try {
                 asyncReceiveHandler.success(asyncContext, rpcResponse);
             } catch (Exception e) {
-                throw new RpcException("asyncReceiveHandler success method invoke error :" + e.getMessage());
+                log.error("asyncReceiveHandler success method invoke error :{}", e.getMessage());
             } finally {
                 requestMap.remove(rpcResponse.getRequestId());
                 log.debug("requestMap remove:{}", rpcResponse.getRequestId());

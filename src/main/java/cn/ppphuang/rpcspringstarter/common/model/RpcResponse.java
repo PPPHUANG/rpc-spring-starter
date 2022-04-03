@@ -131,4 +131,16 @@ public class RpcResponse implements Serializable {
     public void setRpcStatus(RpcStatusEnum rpcStatus) {
         this.rpcStatus = rpcStatus;
     }
+
+    @Override
+    public String toString() {
+        return "RpcResponse{" +
+                "requestId='" + requestId + '\'' +
+                ", async=" + async +
+                ", headers=" + headers +
+                ", returnValue=" + returnValue +
+                ", exception=" + exception +
+                ", rpcStatus=" + rpcStatus +
+                '}';
+    }
 }
