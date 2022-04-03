@@ -35,9 +35,9 @@ public class ClientProxyFactory {
 
     private Map<String, Compresser> supportCompressers;
 
-    private Map<Class<?>, Object> objectCache = new HashMap<>();
+    private Map<String, Object> objectCache = new HashMap<>();
 
-    private Map<Class<?>, Object> asyncObjectCache = new HashMap<>();
+    private Map<String, Object> asyncObjectCache = new HashMap<>();
 
     private LoadBalance loadBalance;
 
@@ -46,14 +46,22 @@ public class ClientProxyFactory {
     private static ThreadLocal<AsyncReceiveHandler> localAsyncReceiveHandler = new ThreadLocal<>();
 
     public <T> T getProxy(Class<T> clazz) {
-        return getProxy(clazz, false);
+        return getProxy(clazz, "", "", false);
     }
 
-    public <T> T getProxy(Class<T> clazz, boolean async) {
+    public <T> T getProxy(Class<T> clazz, String group) {
+        return getProxy(clazz, group, "", false);
+    }
+
+    public <T> T getProxy(Class<T> clazz, String group, String version) {
+        return getProxy(clazz, group, version, false);
+    }
+
+    public <T> T getProxy(Class<T> clazz, String group, String version, boolean async) {
         if (async) {
-            return (T) asyncObjectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz, async)));
+            return (T) asyncObjectCache.computeIfAbsent(clazz.getName() + group + version, clz -> Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new ClientInvocationHandler(clazz, group, version, async)));
         } else {
-            return (T) objectCache.computeIfAbsent(clazz, clz -> Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz, async)));
+            return (T) objectCache.computeIfAbsent(clazz.getName() + group + version, clz -> Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new ClientInvocationHandler(clazz, group, version, async)));
         }
     }
 
@@ -63,9 +71,15 @@ public class ClientProxyFactory {
 
         private boolean async;
 
-        public ClientInvocationHandler(Class<?> clazz, boolean async) {
+        private String group;
+
+        private String version;
+
+        public ClientInvocationHandler(Class<?> clazz, String group, String version, boolean async) {
             this.clazz = clazz;
             this.async = async;
+            this.group = group;
+            this.version = version;
         }
 
         @Override
@@ -88,6 +102,8 @@ public class ClientProxyFactory {
             rpcRequest.setAsync(async);
             rpcRequest.setServiceName(service.getName());
             rpcRequest.setMethod(method.getName());
+            rpcRequest.setGroup(group);
+            rpcRequest.setVersion(version);
             rpcRequest.setParameters(args);
             rpcRequest.setParametersTypes(method.getParameterTypes());
             //3. 协议编组
@@ -165,11 +181,11 @@ public class ClientProxyFactory {
         this.supportCompressers = supportCompressers;
     }
 
-    public Map<Class<?>, Object> getObjectCache() {
+    public Map<String, Object> getObjectCache() {
         return objectCache;
     }
 
-    public void setObjectCache(Map<Class<?>, Object> objectCache) {
+    public void setObjectCache(Map<String, Object> objectCache) {
         this.objectCache = objectCache;
     }
 

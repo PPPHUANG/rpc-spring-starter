@@ -29,7 +29,7 @@ public abstract class DefaultServerRegisrer implements ServerRegister {
         if (so == null) {
             throw new IllegalArgumentException("parameter cannot be empty");
         }
-        serviceMap.put(so.getName(), so);
+        serviceMap.put(so.getName() + so.getGroup() + so.getVersion(), so);
     }
 
     @Override

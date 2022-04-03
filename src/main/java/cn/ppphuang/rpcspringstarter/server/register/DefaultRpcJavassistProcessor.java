@@ -1,7 +1,7 @@
 package cn.ppphuang.rpcspringstarter.server.register;
 
 import cn.ppphuang.rpcspringstarter.annotation.RpcProcessorAno;
-import cn.ppphuang.rpcspringstarter.annotation.Service;
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.server.ProxyFactory;
@@ -31,7 +31,7 @@ public class DefaultRpcJavassistProcessor extends DefaultRpcBaseProcessor {
 
     @Override
     protected void startServer(ApplicationContext context) {
-        Map<String, Object> beans = context.getBeansWithAnnotation(Service.class);
+        Map<String, Object> beans = context.getBeansWithAnnotation(RpcService.class);
         //判定
         if (beans.size() > 0) {
             boolean startServerFlag = true;
@@ -47,23 +47,27 @@ public class DefaultRpcJavassistProcessor extends DefaultRpcBaseProcessor {
                      * 如果只实现了一个接口就用接口的className作为服务名
                      * 如果该类实现了多个接口，则使用注解里的value作为服务名
                      */
+                    RpcService service = clazz.getAnnotation(RpcService.class);
                     if (interfaces.length != 1) {
-                        Service service = clazz.getAnnotation(Service.class);
                         String value = service.value();
                         if ("".equals(value)) {
                             startServerFlag = false;
                             throw new UnsupportedOperationException("The exposed interface is not specific with '" + obj.getClass().getName() + "'");
                         }
+                        /*
+                         * bean实现多个接口时，javassist代理类中生成的方法只按照注解指定的服务类来生成
+                         */
+                        declaredMethods = Class.forName(value).getDeclaredMethods();
                         Object proxy = ProxyFactory.makeProxy(value, beanName, declaredMethods);
-                        so = new ServiceObject(value, Class.forName(value), proxy);
+                        so = new ServiceObject(value, Class.forName(value), proxy, service.group(), service.version());
                     } else {
                         Class<?> supperClass = interfaces[0];
                         Object proxy = ProxyFactory.makeProxy(supperClass.getName(), beanName, declaredMethods);
-                        so = new ServiceObject(supperClass.getName(), supperClass, proxy);
+                        so = new ServiceObject(supperClass.getName(), supperClass, proxy, service.group(), service.version());
                     }
                     serverRegister.register(so);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("rpc start exception :", e);
                 }
             }
 

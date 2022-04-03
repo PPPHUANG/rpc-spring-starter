@@ -37,7 +37,7 @@ public abstract class RequestBaseHandler {
         RpcRequest request = protocol.unmarshallingRequest(data);
         log.debug("the server receives encode message :{}", request);
         //2. 查找服务对象
-        ServiceObject serviceObject = serverRegister.getServiceObject(request.getServiceName());
+        ServiceObject serviceObject = serverRegister.getServiceObject(request.getServiceName() + request.getGroup() + request.getVersion());
         RpcResponse response = null;
 
         if (serviceObject == null) {

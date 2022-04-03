@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class RpcSpringStarterApplicationTests {
 
-//    @Autowired
-//    ClientProxyFactory clientProxyFactory;
+    @Autowired
+    ClientProxyFactory clientProxyFactory;
 
     @Test
     void contextLoads() {
@@ -19,18 +19,32 @@ class RpcSpringStarterApplicationTests {
 
     @Test
     void testSync() throws InterruptedException {
-//        HelloService proxy = clientProxyFactory.getProxy(HelloService.class);
-//        String ppphuang = proxy.hello("ppphuang");
-//        System.out.println(ppphuang);
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class);
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
+    }
+
+    @Test
+    void testSyncGroup() throws InterruptedException {
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group1");
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
+    }
+
+    @Test
+    void testSyncGroupVersion() throws InterruptedException {
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group1", "version1");
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
     }
 
     @Test
     void testAsync() throws InterruptedException {
-//        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, true);
-//        TestCallBackHandler callBackHandler = new TestCallBackHandler();
-//        ClientProxyFactory.setLocalAsyncContextAndAsyncReceiveHandler("context", callBackHandler);
-//        String ppphuang = proxy.hello("ppphuang");
-//        System.out.println(ppphuang);
-//        Thread.sleep(10000);
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group2", "version2", true);
+        TestCallBackHandler callBackHandler = new TestCallBackHandler();
+        ClientProxyFactory.setLocalAsyncContextAndAsyncReceiveHandler("context", callBackHandler);
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
+        Thread.sleep(10000);
     }
 }

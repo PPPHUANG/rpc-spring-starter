@@ -25,7 +25,7 @@ public class ProxyFactory {
     public static Object makeProxy(String interfaceName, String springBeanName, Method[] methods) throws Exception {
         ClassPool pool = ClassPool.getDefault();
         pool.appendSystemPath();
-        CtClass proxyClass = pool.makeClass(interfaceName + "$proxy");
+        CtClass proxyClass = pool.makeClass(interfaceName + "$proxy" + System.currentTimeMillis());
         //实现invoke接口
         CtClass invokeProxy = pool.get(RpcConstant.INVOKE_PROXY_INTERFACE_NAME);
         proxyClass.addInterface(invokeProxy);

@@ -1,7 +1,7 @@
 package cn.ppphuang.rpcspringstarter.server.register;
 
 import cn.ppphuang.rpcspringstarter.annotation.InjectService;
-import cn.ppphuang.rpcspringstarter.annotation.Service;
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZkChildListenerImpl;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
@@ -80,7 +80,7 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
                 Object object = context.getBean(name);
                 field.setAccessible(true);
                 try {
-                    field.set(object, clientProxyFactory.getProxy(fieldClass));
+                    field.set(object, clientProxyFactory.getProxy(fieldClass, injectService.group(), injectService.version()));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -100,7 +100,7 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
     }
 
     private void startServer(ApplicationContext context) {
-        Map<String, Object> beans = context.getBeansWithAnnotation(Service.class);
+        Map<String, Object> beans = context.getBeansWithAnnotation(RpcService.class);
         if (beans.size() > 0) {
             boolean startServerFlag = true;
             for (Object obj : beans.values()) {
@@ -112,17 +112,17 @@ public class DefaultRpcProcessor implements ApplicationListener<ContextRefreshed
                      * 如果只实现了一个接口就用接口的className作为服务名
                      * 如果该类实现了多个接口，则使用注解里的value作为服务名
                      */
+                    RpcService service = clazz.getAnnotation(RpcService.class);
                     if (interfaces.length != 1) {
-                        Service service = clazz.getAnnotation(Service.class);
                         String value = service.value();
                         if ("".equals(value)) {
                             startServerFlag = false;
                             throw new UnsupportedOperationException("The exposed interface is not specific with '" + obj.getClass().getName() + "'");
                         }
-                        so = new ServiceObject(value, Class.forName(value), obj);
+                        so = new ServiceObject(value, Class.forName(value), obj, service.group(), service.version());
                     } else {
                         Class<?> supperClass = interfaces[0];
-                        so = new ServiceObject(supperClass.getName(), supperClass, obj);
+                        so = new ServiceObject(supperClass.getName(), supperClass, obj, service.group(), service.version());
                     }
                     serverRegister.register(so);
                 } catch (Exception e) {

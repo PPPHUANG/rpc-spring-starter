@@ -14,4 +14,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface InjectService {
+    /**
+     * 服务分组
+     */
+    String group() default "";
+
+    /**
+     * 服务版本
+     */
+    String version() default "";
 }

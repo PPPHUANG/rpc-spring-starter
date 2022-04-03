@@ -81,7 +81,7 @@ public abstract class DefaultRpcBaseProcessor implements ApplicationListener<Con
                 Object object = context.getBean(name);
                 field.setAccessible(true);
                 try {
-                    field.set(object, clientProxyFactory.getProxy(fieldClass));
+                    field.set(object, clientProxyFactory.getProxy(fieldClass, injectService.group(), injectService.version()));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }

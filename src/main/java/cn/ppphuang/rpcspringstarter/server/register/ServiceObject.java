@@ -22,10 +22,22 @@ public class ServiceObject {
      */
     private Object obj;
 
-    public ServiceObject(String name, Class<?> clazz, Object obj) {
+    /**
+     * 服务分组
+     */
+    private String group;
+
+    /**
+     * 服务版本
+     */
+    private String version;
+
+    public ServiceObject(String name, Class<?> clazz, Object obj, String group, String version) {
         this.name = name;
         this.clazz = clazz;
         this.obj = obj;
+        this.group = group;
+        this.version = version;
     }
 
     public String getName() {
@@ -50,5 +62,21 @@ public class ServiceObject {
 
     public void setObj(Object obj) {
         this.obj = obj;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

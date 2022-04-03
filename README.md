@@ -12,7 +12,8 @@
 - [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强
 - [x] 支持异步调用
 - [x] 支持Gzip压缩
-- [ ] 支持服务分组与服务版本
+- [x] 支持服务分组与服务版本
+- [ ] 连接保持心跳
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流、熔断、降级
@@ -67,13 +68,14 @@ public interface HelloService {
 }
 ```
 
-2. 实现服务接口并通过`@Service`注解发布服务。
+2. 实现服务接口并通过`@RpcService`注解发布服务。
 
  ```java
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
 import cn.ppphuang.rpcspringstarter.annotation.Service;
 import cn.ppphuang.rpcspringstarter.service.HelloService;
 
-@Service
+@RpcService
 public class HelloServiceImpl implements HelloService {
 
     @Override
@@ -83,7 +85,49 @@ public class HelloServiceImpl implements HelloService {
 }
  ```
 
-**注意：** 这里的`@Service`是`rpcspringstarter`的注解。
+ ```java
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
+import cn.ppphuang.rpcspringstarter.service.HelloService;
+
+@RpcService(group = "group1")
+public class HelloServiceGroup1Impl implements HelloService {
+
+    @Override
+    public String hello(String name) {
+        return name + "hello group1";
+    }
+}
+ ```
+
+ ```java
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
+import cn.ppphuang.rpcspringstarter.service.HelloService;
+
+@RpcService(group = "group1", version = "version1")
+public class HelloServiceGroup1Version1Impl implements HelloService {
+
+    @Override
+    public String hello(String name) {
+        return name + "hello group1 version1";
+    }
+}
+ ```
+
+当服务实现类实现了多个接口时，需要通过`value`注明该方法提供的是哪个服务接口的实现
+
+ ```java
+import cn.ppphuang.rpcspringstarter.annotation.RpcService;
+import cn.ppphuang.rpcspringstarter.service.HelloService;
+
+@RpcService(value = "cn.ppphuang.rpcspringstarter.service.HelloService", group = "group2", version = "version2")
+public class HelloServiceGroup2Version2Impl implements HelloService, PersionService {
+
+    @Override
+    public String hello(String name) {
+        return name + "hello group2 version2";
+    }
+}
+ ```
 
 ## 客户端
 
@@ -101,13 +145,32 @@ public class TestService1 {
     @InjectService
     HelloService helloService;
 
+    @InjectService(group = "group1")
+    HelloService helloServiceGroup1;
+
+    @InjectService(group = "group1", version = "version1")
+    HelloService helloServiceGroup1Version1;
+
+    @InjectService(group = "group2", version = "version2")
+    HelloService helloServiceGroup2Version2;
+
     public String sayHai(String name) {
+        return helloService.hello(name);
+    }
+
+    public String sayHaiGroup1(String name) {
+        return helloService.hello(name);
+    }
+
+    public String sayHaiGroup1Version1(String name) {
+        return helloService.hello(name);
+    }
+
+    public String sayHaiGroup2Version2(String name) {
         return helloService.hello(name);
     }
 }
  ```
-
-**注意：** 这里的`@Service`是`Spring`的注解。
 
 2. 手动获取代理对象。
 
@@ -120,6 +183,20 @@ class RpcSpringStarterApplicationTests {
     @Test
     void testSync() throws InterruptedException {
         HelloService proxy = clientProxyFactory.getProxy(HelloService.class);
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
+    }
+
+    @Test
+    void testSyncGroupVersion() throws InterruptedException {
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group1");
+        String ppphuang = proxy.hello("ppphuang");
+        System.out.println(ppphuang);
+    }
+
+    @Test
+    void testSyncGroupVersion() throws InterruptedException {
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group1", "version1");
         String ppphuang = proxy.hello("ppphuang");
         System.out.println(ppphuang);
     }
@@ -151,7 +228,7 @@ class RpcSpringStarterApplicationTests {
     @Test
     void testAsync() throws InterruptedException {
         //获取异步代理类
-        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, true);
+        HelloService proxy = clientProxyFactory.getProxy(HelloService.class, "group1", "version1", true);
         //继承AsyncReceiveHandler 实现抽象方法 然后实例化自定义的回调对象
         TestCallBackHandler callBackHandler = new TestCallBackHandler();
         //设置的回调上下文以及回调对象
