@@ -5,7 +5,10 @@ import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
+import cn.ppphuang.rpcspringstarter.common.Extension.ExtensionLoader;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import cn.ppphuang.rpcspringstarter.properties.RpcConfig;
@@ -21,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -35,17 +39,28 @@ import java.util.ServiceLoader;
 @EnableConfigurationProperties(RpcConfig.class)
 @ConditionalOnProperty(prefix = "hp.rpc", name = "enable", havingValue = "true", matchIfMissing = true)
 public class RpcAutoConfiguration {
+
+    @PostConstruct
+    public void extensionLoader() {
+        //setSupportMessageProtocols
+        Map<String, MessageProtocol> supportMessageProtocol = buildSupportMessageProtocol();
+        ExtensionLoader.setSupportMessageProtocols(supportMessageProtocol);
+        //setSupportCompresser
+        Map<String, Compresser> supportCompresser = buildSupportCompresser();
+        ExtensionLoader.setSupportCompressers(supportCompresser);
+    }
+
     @Bean
     public ServerRegister serverRegister(@Autowired RpcConfig rpcConfig) {
-        return new ZookeeperServerRegister(rpcConfig.getRegisterAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.isEnableCompress() ? rpcConfig.getCompress() : null, rpcConfig.getWeight());
+        return new ZookeeperServerRegister(rpcConfig.getRegisterAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.isEnableCompress() ? rpcConfig.getCompress() : RpcCompressEnum.UNZIP.getCompress(), rpcConfig.getWeight());
     }
 
     @Bean
     public RequestBaseHandler requestBaseHandler(@Autowired ServerRegister serverRegister, @Autowired RpcConfig rpcConfig) {
         RequestBaseHandler requestHandler = getRequestHandler(rpcConfig.getServerProxyType());
         requestHandler.setServerRegister(serverRegister);
-        requestHandler.setProtocol(getMessageProtocol(rpcConfig.getProtocol()));
-        requestHandler.setCompresser(rpcConfig.isEnableCompress() ? getCompresser(rpcConfig.getCompress()) : null);
+        requestHandler.setProtocol(RpcProtocolEnum.getProtocol(rpcConfig.getProtocol()));
+        requestHandler.setCompresser(rpcConfig.isEnableCompress() ? RpcCompressEnum.getCompress(rpcConfig.getCompress()) : RpcCompressEnum.UNZIP);
         return requestHandler;
     }
 
@@ -59,12 +74,6 @@ public class RpcAutoConfiguration {
         ClientProxyFactory clientProxyFactory = new ClientProxyFactory();
         //setServiceDiscoverer
         clientProxyFactory.setServiceDiscoverer(new ZookeeperServerDiscovery(rpcConfig.getRegisterAddress()));
-        //setSupportMessageProtocols
-        Map<String, MessageProtocol> supportMessageProtocol = buildSupportMessageProtocol();
-        clientProxyFactory.setSupportMessageProtocols(supportMessageProtocol);
-        //setSupportCompresser
-        Map<String, Compresser> supportCompresser = buildSupportCompresser();
-        clientProxyFactory.setSupportCompressers(supportCompresser);
         LoadBalance loadBalance = getLoadBalance(rpcConfig.getLoadBalance());
         clientProxyFactory.setLoadBalance(loadBalance);
         clientProxyFactory.setNetClient(new NettyNetClient());
@@ -96,7 +105,7 @@ public class RpcAutoConfiguration {
         throw new RpcException("invalid message protocol config!");
     }
 
-    public Map<String, MessageProtocol> buildSupportMessageProtocol() {
+    public static Map<String, MessageProtocol> buildSupportMessageProtocol() {
         HashMap<String, MessageProtocol> supportMessageProtocol = new HashMap<>();
         ServiceLoader<MessageProtocol> loader = ServiceLoader.load(MessageProtocol.class);
         for (MessageProtocol messageProtocol : loader) {

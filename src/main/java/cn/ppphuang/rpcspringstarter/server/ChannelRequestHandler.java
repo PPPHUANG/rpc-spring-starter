@@ -1,9 +1,10 @@
 package cn.ppphuang.rpcspringstarter.server;
 
-import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
+import cn.ppphuang.rpcspringstarter.common.model.RpcMessage;
+import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
+import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.server.handler.RequestBaseHandler;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -37,21 +38,20 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
         NettyRpcServer.THREAD_POOL.submit(() -> {
             try {
                 log.debug("the server receives decode message :{}", msg);
-                ByteBuf byteBuf = (ByteBuf) msg;
-                byte[] bytes = new byte[byteBuf.readableBytes()];
-                byteBuf.readBytes(bytes);
-                //回收ByteBuf
-                ReferenceCountUtil.release(byteBuf);
-                Compresser compresser = requestHandler.getCompresser();
-                bytes = compresser == null ? bytes : compresser.decompress(bytes);
-                byte[] resp = requestHandler.handleRequest(bytes);
-                resp = compresser == null ? resp : compresser.compress(resp);
-                ByteBuf respBuffer = Unpooled.buffer(resp.length);
-                respBuffer.writeBytes(resp);
-                log.debug("Send Response:{}", respBuffer);
-                ctx.writeAndFlush(respBuffer);
+                RpcMessage message = (RpcMessage) msg;
+                RpcResponse resp = requestHandler.handleRequest((RpcRequest) message.getData());
+                RpcMessage rpcMessage = new RpcMessage();
+                rpcMessage.setProtocol(requestHandler.getProtocol());
+                rpcMessage.setCompress(requestHandler.getCompresser());
+                rpcMessage.setType(RpcConstant.RESPONSE_TYPE);
+                rpcMessage.setData(resp);
+                log.debug("Send Response:{}", rpcMessage);
+                ctx.writeAndFlush(rpcMessage);
             } catch (Exception e) {
                 log.error("server read exception", e);
+            } finally {
+                //回收ByteBuf
+                ReferenceCountUtil.release(msg);
             }
         });
     }

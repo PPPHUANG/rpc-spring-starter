@@ -4,12 +4,12 @@ import cn.ppphuang.rpcspringstarter.client.async.AsyncReceiveHandler;
 import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.cache.ServerDiscoveryCache;
 import cn.ppphuang.rpcspringstarter.client.discovery.ServiceDiscoverer;
-import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
-import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,10 +33,6 @@ public class ClientProxyFactory {
     private ServiceDiscoverer serviceDiscoverer;
 
     private NetClient netClient;
-
-    private Map<String, MessageProtocol> supportMessageProtocols;
-
-    private Map<String, Compresser> supportCompressers;
 
     private Map<String, Object> objectCache = new HashMap<>();
 
@@ -110,8 +106,8 @@ public class ClientProxyFactory {
             rpcRequest.setParameters(args);
             rpcRequest.setParametersTypes(method.getParameterTypes());
             //3. 协议编组
-            MessageProtocol messageProtocol = supportMessageProtocols.get(service.getProtocol());
-            Compresser compresser = supportCompressers.get(service.getCompress());
+            RpcProtocolEnum messageProtocol = RpcProtocolEnum.getProtocol(service.getProtocol());
+            RpcCompressEnum compresser = RpcCompressEnum.getCompress(service.getCompress());
             RpcResponse response = netClient.sendRequest(rpcRequest, service, messageProtocol, compresser);
             if (response == null) {
                 throw new RpcException("the response is null");
@@ -169,22 +165,6 @@ public class ClientProxyFactory {
 
     public void setNetClient(NetClient netClient) {
         this.netClient = netClient;
-    }
-
-    public Map<String, MessageProtocol> getSupportMessageProtocols() {
-        return supportMessageProtocols;
-    }
-
-    public void setSupportMessageProtocols(Map<String, MessageProtocol> supportMessageProtocols) {
-        this.supportMessageProtocols = supportMessageProtocols;
-    }
-
-    public Map<String, Compresser> getSupportCompressers() {
-        return supportCompressers;
-    }
-
-    public void setSupportCompressers(Map<String, Compresser> supportCompressers) {
-        this.supportCompressers = supportCompressers;
     }
 
     public Map<String, Object> getObjectCache() {

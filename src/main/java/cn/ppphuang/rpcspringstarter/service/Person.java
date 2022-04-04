@@ -1,10 +1,12 @@
 package cn.ppphuang.rpcspringstarter.service;
 
+import java.io.Serializable;
+
 /**
  * @Author: ppphuang
  * @Create: 2022/3/31
  */
-public class Person {
+public class Person implements Serializable {
     int age;
     String name;
 

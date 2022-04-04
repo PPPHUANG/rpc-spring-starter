@@ -1,10 +1,10 @@
 package cn.ppphuang.rpcspringstarter.client.net;
 
-import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
-import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 
 /**
  * 客户端网络接口
@@ -32,5 +32,5 @@ public interface NetClient {
      * @param compresser
      * @return
      */
-    RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol, Compresser compresser);
+    RpcResponse sendRequest(RpcRequest rpcRequest, Service service, RpcProtocolEnum messageProtocol, RpcCompressEnum compresser);
 }

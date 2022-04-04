@@ -2,18 +2,18 @@ package cn.ppphuang.rpcspringstarter.client.net;
 
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandler;
 import cn.ppphuang.rpcspringstarter.client.net.handler.SendHandlerV2;
-import cn.ppphuang.rpcspringstarter.common.codec.LengthEncoder;
-import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.codec.MessageDecoder;
+import cn.ppphuang.rpcspringstarter.common.codec.MessageEncoder;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.common.model.Service;
-import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -56,8 +56,8 @@ public class NettyNetClient implements NetClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(4096, 0, 4, 0, 4));
-                            pipeline.addLast(new LengthEncoder());
+                            pipeline.addLast(new MessageDecoder());
+                            pipeline.addLast(new MessageEncoder());
                             pipeline.addLast(sendHandler);
                         }
                     });
@@ -72,7 +72,7 @@ public class NettyNetClient implements NetClient {
     }
 
     @Override
-    public RpcResponse sendRequest(RpcRequest rpcRequest, Service service, MessageProtocol messageProtocol, Compresser compresser) {
+    public RpcResponse sendRequest(RpcRequest rpcRequest, Service service, RpcProtocolEnum messageProtocol, RpcCompressEnum compresser) {
         String address = service.getAddress();
         synchronized (address) {
             if (connectedServerNodes.containsKey(address)) {
@@ -93,8 +93,8 @@ public class NettyNetClient implements NetClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(4096, 0, 4, 0, 4));
-                            pipeline.addLast(new LengthEncoder());
+                            pipeline.addLast(new MessageDecoder());
+                            pipeline.addLast(new MessageEncoder());
                             pipeline.addLast(handler);
                         }
                     });

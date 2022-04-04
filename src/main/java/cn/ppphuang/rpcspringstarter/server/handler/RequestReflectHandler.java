@@ -2,10 +2,10 @@ package cn.ppphuang.rpcspringstarter.server.handler;
 
 import cn.ppphuang.rpcspringstarter.annotation.ServerProxyAno;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
-import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ServiceObject;
 
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 @ServerProxyAno(RpcConstant.SERVER_PROXY_TYPE_REFLECT)
 public class RequestReflectHandler extends RequestBaseHandler {
 
-    public RequestReflectHandler(MessageProtocol protocol, ServerRegister serverRegister) {
+    public RequestReflectHandler(RpcProtocolEnum protocol, ServerRegister serverRegister) {
         super(protocol, serverRegister);
     }
 

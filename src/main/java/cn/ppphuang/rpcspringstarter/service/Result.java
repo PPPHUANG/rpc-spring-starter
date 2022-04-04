@@ -1,10 +1,12 @@
 package cn.ppphuang.rpcspringstarter.service;
 
+import java.io.Serializable;
+
 /**
  * @Author: ppphuang
  * @Create: 2022/3/31
  */
-public class Result<T> {
+public class Result<T> implements Serializable {
     Integer code;
     String message;
     T data;

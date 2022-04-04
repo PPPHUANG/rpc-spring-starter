@@ -1,10 +1,10 @@
 package cn.ppphuang.rpcspringstarter.server.handler;
 
-import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
+import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcStatusEnum;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
-import cn.ppphuang.rpcspringstarter.common.protocol.MessageProtocol;
 import cn.ppphuang.rpcspringstarter.server.register.ServerRegister;
 import cn.ppphuang.rpcspringstarter.server.register.ServiceObject;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class RequestBaseHandler {
 
-    private MessageProtocol protocol;
+    private RpcProtocolEnum protocol;
 
-    private Compresser compresser;
+    private RpcCompressEnum compresser;
 
     private ServerRegister serverRegister;
 
-    public RequestBaseHandler(MessageProtocol protocol, ServerRegister serverRegister) {
+    public RequestBaseHandler(RpcProtocolEnum protocol, ServerRegister serverRegister) {
         this.protocol = protocol;
         this.serverRegister = serverRegister;
     }
@@ -32,9 +32,9 @@ public abstract class RequestBaseHandler {
     public RequestBaseHandler() {
     }
 
-    public byte[] handleRequest(byte[] data) throws Exception {
+    public RpcResponse handleRequest(RpcRequest request) throws Exception {
         //1. 解组消息
-        RpcRequest request = protocol.unmarshallingRequest(data);
+//        RpcRequest request = protocol.unmarshallingRequest(data);
         log.debug("the server receives encode message :{}", request);
         //2. 查找服务对象
         ServiceObject serviceObject = serverRegister.getServiceObject(request.getServiceName() + request.getGroup() + request.getVersion());
@@ -54,7 +54,7 @@ public abstract class RequestBaseHandler {
         //响应
         response.setRequestId(request.getRequestId());
         response.setAsync(request.isAsync());
-        return protocol.marshallingResponse(response);
+        return response;
     }
 
     /**
@@ -64,11 +64,11 @@ public abstract class RequestBaseHandler {
      */
     public abstract RpcResponse invoke(ServiceObject serviceObject, RpcRequest request) throws Exception;
 
-    public MessageProtocol getProtocol() {
+    public RpcProtocolEnum getProtocol() {
         return protocol;
     }
 
-    public void setProtocol(MessageProtocol protocol) {
+    public void setProtocol(RpcProtocolEnum protocol) {
         this.protocol = protocol;
     }
 
@@ -80,11 +80,11 @@ public abstract class RequestBaseHandler {
         this.serverRegister = serverRegister;
     }
 
-    public Compresser getCompresser() {
+    public RpcCompressEnum getCompresser() {
         return compresser;
     }
 
-    public void setCompresser(Compresser compresser) {
+    public void setCompresser(RpcCompressEnum compresser) {
         this.compresser = compresser;
     }
 }
