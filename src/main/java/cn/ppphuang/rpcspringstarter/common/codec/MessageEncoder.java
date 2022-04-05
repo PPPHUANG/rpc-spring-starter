@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *   |                                            ... ...                                                           |
  *   +--------------------------------------------------------------------------------------------------------------+
  * 4B  magic code（魔数）      1B version（协议版本）   4B full length（消息长度）    1B type（消息类型）
- * 1B  compress（压缩类型）     1B codec（序列化类型）   4B requestId（请求的Id）
+ * 1B  compress（压缩类型）     1B protocol（序列化类型）   4B requestId（请求的Id）
  * body（object类型数据）
  * </pre>
  *

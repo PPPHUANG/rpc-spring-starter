@@ -14,6 +14,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class NettyNetClient implements NetClient {
 
-    private static ExecutorService threadPool = new ThreadPoolExecutor(4, 10, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
+    private static ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 10, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
 
     private EventLoopGroup loopGroup = new NioEventLoopGroup(4);
 
@@ -56,6 +57,7 @@ public class NettyNetClient implements NetClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
                             pipeline.addLast(new MessageDecoder());
                             pipeline.addLast(new MessageEncoder());
                             pipeline.addLast(sendHandler);
@@ -93,6 +95,7 @@ public class NettyNetClient implements NetClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
                             pipeline.addLast(new MessageDecoder());
                             pipeline.addLast(new MessageEncoder());
                             pipeline.addLast(handler);
@@ -100,7 +103,9 @@ public class NettyNetClient implements NetClient {
                     });
             //new connect
             ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
-            channelFuture.addListener((ChannelFutureListener) channelFuture1 -> connectedServerNodes.put(address, handler));
+            channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
+                connectedServerNodes.put(address, handler);
+            });
         });
         log.debug("使用新的连接。。。");
         return handler.sendRequest(rpcRequest);

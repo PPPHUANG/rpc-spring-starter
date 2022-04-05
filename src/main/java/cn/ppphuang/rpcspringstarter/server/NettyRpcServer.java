@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
@@ -51,6 +52,7 @@ public class NettyRpcServer extends RpcServer {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
+                            pipeline.addLast(new IdleStateHandler(15, 0, 0, TimeUnit.SECONDS));
                             pipeline.addLast(new MessageDecoder());
                             pipeline.addLast(new MessageEncoder());
                             pipeline.addLast(new ChannelRequestHandler(requestHandler));

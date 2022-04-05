@@ -13,8 +13,11 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 import cn.ppphuang.rpcspringstarter.exception.RpcException;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,10 +65,6 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         log.debug("Connect to server successfully:{}", ctx);
-    }
-
-    @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         this.channel = ctx.channel();
         latch.countDown();
     }
@@ -73,27 +72,33 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            log.debug("Client read message:{}", msg);
-            RpcMessage message = (RpcMessage) msg;
-            log.debug("Client read string message:{}", message);
-            RpcResponse rpcResponse = (RpcResponse) message.getData();
-            RpcFuture<RpcResponse> rpcResponseRpcFuture = requestMap.get(rpcResponse.getRequestId());
-            //异步处理
-            if (rpcResponse.isAsync()) {
-                AsyncReceiveHandler asyncReceiveHandler = rpcResponseRpcFuture.getAsyncReceiveHandler();
-                Object asyncContext = rpcResponseRpcFuture.getAsyncContext();
-                log.debug("asyncReceiveHandler:{}", asyncReceiveHandler);
-                log.debug("asyncContext:{}", asyncContext);
-                try {
-                    asyncReceiveHandler.success(asyncContext, rpcResponse);
-                } catch (Exception e) {
-                    log.error("asyncReceiveHandler success method invoke error :{}", e.getMessage());
-                } finally {
-                    requestMap.remove(rpcResponse.getRequestId());
-                    log.debug("requestMap remove:{}", rpcResponse.getRequestId());
+            if (msg instanceof RpcMessage) {
+                RpcMessage message = (RpcMessage) msg;
+                if (message.getType() == RpcConstant.HEARTBEAT_RESPONSE_TYPE) {
+                    log.debug("receive heart response:{}", message.getData());
+                } else if (message.getType() == RpcConstant.RESPONSE_TYPE) {
+                    RpcResponse rpcResponse = (RpcResponse) message.getData();
+                    RpcFuture<RpcResponse> rpcResponseRpcFuture = requestMap.get(rpcResponse.getRequestId());
+                    //异步处理
+                    if (rpcResponse.isAsync()) {
+                        AsyncReceiveHandler asyncReceiveHandler = rpcResponseRpcFuture.getAsyncReceiveHandler();
+                        Object asyncContext = rpcResponseRpcFuture.getAsyncContext();
+                        log.debug("asyncReceiveHandler:{}", asyncReceiveHandler);
+                        log.debug("asyncContext:{}", asyncContext);
+                        try {
+                            asyncReceiveHandler.success(asyncContext, rpcResponse);
+                        } catch (Exception e) {
+                            log.error("asyncReceiveHandler success method invoke error :{}", e.getMessage());
+                        } finally {
+                            requestMap.remove(rpcResponse.getRequestId());
+                            log.debug("requestMap remove:{}", rpcResponse.getRequestId());
+                        }
+                    } else {
+                        rpcResponseRpcFuture.setResponse(rpcResponse);
+                    }
                 }
             } else {
-                rpcResponseRpcFuture.setResponse(rpcResponse);
+                log.error("receive error message :{} remoteAddress:{}", msg, channel.remoteAddress());
             }
         } finally {
             //手动回收
@@ -122,7 +127,19 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        super.userEventTriggered(ctx, evt);
+        if (evt instanceof IdleStateEvent) {
+            IdleState state = ((IdleStateEvent) evt).state();
+            if (state == IdleState.WRITER_IDLE) {
+                log.info("write idle happen [{}]", ctx.channel().remoteAddress());
+                RpcMessage message = new RpcMessage();
+                message.setType(RpcConstant.HEARTBEAT_REQUEST_TYPE);
+                message.setCompress(RpcCompressEnum.UNZIP);
+                message.setProtocol(RpcProtocolEnum.KRYO);
+                channel.writeAndFlush(message).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
     }
 
     public RpcResponse sendRequest(RpcRequest request) {
@@ -144,7 +161,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
             rpcMessage.setType(RpcConstant.REQUEST_TYPE);
             rpcMessage.setData(request);
             if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
-                channel.writeAndFlush(rpcMessage);
+                channel.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 //waiting
                 response = responseFuture.get(RESPONSE_WAIT_TIME, TimeUnit.SECONDS);
             } else {
@@ -174,7 +191,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
             rpcMessage.setType(RpcConstant.REQUEST_TYPE);
             rpcMessage.setData(request);
             if (latch.await(CHANNEL_WAIT_TIME, TimeUnit.SECONDS)) {
-                channel.writeAndFlush(rpcMessage);
+                channel.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 response.setAsync(request.isAsync());
                 response.setRequestId(request.getRequestId());
                 response.setReturnValue(null);

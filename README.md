@@ -13,24 +13,28 @@
 - [x] 支持异步调用
 - [x] 支持Gzip压缩
 - [x] 支持服务分组与服务版本
-- [ ] 连接保持心跳
+- [x] 连接保持心跳
+- [x] 增加传输协议
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流、熔断、降级
 - [ ] 支持灰度
 
 1. 克隆本项目到本地install。
+
 ```bash
 mvn  clean install -DskipTests=true
 ```
 
 2. 添加maven依赖到你的`SpringBoot`项目中。
+
  ```xml
-   <dependency>
-        <groupId>cn.ppphuang</groupId>
-        <artifactId>rpc-spring-starter</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </dependency>
+
+<dependency>
+    <groupId>cn.ppphuang</groupId>
+    <artifactId>rpc-spring-starter</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+</dependency>
  ```
 
 3. 启动ZK。
@@ -57,6 +61,23 @@ hp.rpc.server-proxy-type=javassist
 #服务权重
 hp.rpc.weight=1
 ```
+
+## 传输协议
+
+<pre>
+ *   0     1     2     3     4         5     6     7     8     9      10         11         12    13    14    15   16
+ *   +-----+-----+-----+-----+---------+-----+-----+-----+-----+------+----------+----------+-----+-----+-----+-----+
+ *   |   magic   code        | version |      full length      | type | protocol | compress |       RequestId       |
+ *   +-----------------------+---------+-----------------------+------+----------+----------+-----------------------+
+ *   |                                                                                                              |
+ *   |                                             body                                                             |
+ *   |                                                                                                              |
+ *   |                                            ... ...                                                           |
+ *   +--------------------------------------------------------------------------------------------------------------+
+ * 4B  magic code（魔数）      1B version（协议版本）   4B full length（消息长度）    1B type（消息类型）
+ * 1B  compress（压缩类型）     1B protocol（序列化类型）   4B requestId（请求的Id）
+ * body（object类型数据）
+ </pre>
 
 ## 服务端
 
@@ -214,7 +235,7 @@ public class TestCallBackHandler extends AsyncReceiveHandler {
         System.out.println(context);
         System.out.println(result);
     }
-    
+
     @Override
     public void onException(Object context, Object result, Exception e) {
         System.out.println(context);
