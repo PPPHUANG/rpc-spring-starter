@@ -37,7 +37,7 @@ public abstract class AsyncReceiveHandler {
     public abstract void callBack(Object context, Object result);
 
     /**
-     * 重写此方法，可以在callBack中自行处理业务处理异常，也可以重新此方法兜底处理
+     * 重写此方法，可以在callBack中自行处理业务处理异常，也可以重写此方法兜底处理
      *
      * @param context
      * @param result

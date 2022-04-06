@@ -50,7 +50,7 @@
 - [ ] 支持灰度
 
 ## 使用方式
-
+> 具体可参考[演示项目](https://github.com/PPPHUANG/rpc-spring-starter-demo)
 1. 克隆本项目到本地install。
 
 ```bash
