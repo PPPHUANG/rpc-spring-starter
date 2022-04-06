@@ -11,6 +11,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
@@ -28,9 +29,6 @@ public class NettyRpcServer extends RpcServer {
 
     private Channel channel;
 
-    public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(4, 8, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
-
-
     public NettyRpcServer(int port, String protocol, RequestBaseHandler requestHandler) {
         super(port, protocol, requestHandler);
     }
@@ -42,11 +40,14 @@ public class NettyRpcServer extends RpcServer {
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
+            DefaultEventExecutorGroup serviceHandlerGroup = new DefaultEventExecutorGroup(
+                    Runtime.getRuntime().availableProcessors() * 2
+            );
             serverBootstrap.group(boosGroup, workerGroup).channel(NioServerSocketChannel.class)
                     //三次握手连接队列（accept queue） 存放已完成三次握手的请求的队列的最大长度
                     .option(ChannelOption.SO_BACKLOG, 128)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.TCP_NODELAY, true)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -55,7 +56,7 @@ public class NettyRpcServer extends RpcServer {
                             pipeline.addLast(new IdleStateHandler(15, 0, 0, TimeUnit.SECONDS));
                             pipeline.addLast(new MessageDecoder());
                             pipeline.addLast(new MessageEncoder());
-                            pipeline.addLast(new ChannelRequestHandler(requestHandler));
+                            pipeline.addLast(serviceHandlerGroup, new ChannelRequestHandler(requestHandler));
                         }
                     });
             ChannelFuture future = serverBootstrap.bind(port).sync();

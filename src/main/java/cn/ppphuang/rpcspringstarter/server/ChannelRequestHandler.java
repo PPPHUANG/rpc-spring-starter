@@ -51,7 +51,6 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
                     heartMessage.setType(RpcConstant.HEARTBEAT_RESPONSE_TYPE);
                     ctx.writeAndFlush(heartMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
-                    NettyRpcServer.THREAD_POOL.submit(() -> {
                         try {
                             log.debug("the server receives decode message :{}", msg);
                             RpcResponse resp = requestHandler.handleRequest((RpcRequest) message.getData());
@@ -62,11 +61,9 @@ public class ChannelRequestHandler extends ChannelInboundHandlerAdapter {
                             rpcMessage.setData(resp);
                             log.debug("Send Response:{}", rpcMessage);
                             ctx.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-                            ;
                         } catch (Exception e) {
                             log.error("server read exception", e);
                         }
-                    });
                 }
             } else {
                 log.error("receive error message :{} remoteAddress:{}", msg, ctx.channel().remoteAddress());

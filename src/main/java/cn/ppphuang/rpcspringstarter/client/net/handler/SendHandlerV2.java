@@ -130,7 +130,7 @@ public class SendHandlerV2 extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.WRITER_IDLE) {
-                log.info("write idle happen [{}]", ctx.channel().remoteAddress());
+                log.debug("write idle happen [{}]", ctx.channel().remoteAddress());
                 RpcMessage message = new RpcMessage();
                 message.setType(RpcConstant.HEARTBEAT_REQUEST_TYPE);
                 message.setCompress(RpcCompressEnum.UNZIP);

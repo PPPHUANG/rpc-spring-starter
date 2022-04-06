@@ -1,35 +1,65 @@
 # rpc-spring-starter
 
-> 基于Netty的RPC框架
+## 基本介绍
 
-## TODO
+> rpc-spring-starter是一个基于Netty、Zookeeper、Kryo、Javassist的RPC框架。SpringBoot项目开箱即用，自动发布服务，注入服务。该项目包含不限于RPC原理、Java基础（注解、反射、同步器、Future、SPI、动态代理）、Javassist字节码增强、服务注册与发现、Netty网络通讯、传输协议、序列化、TCP粘包\拆包、长连接复用、心跳检测、SpringBoot自动装载、服务分组、接口版本、Gzip包压缩、客户端连接池、负载均衡、异步调用等。
 
-- [X] Netty通讯
-- [x] 基于ZK的服务注册发现
-- [x] 客户端负载均衡
-- [x] 支持Java、ProtoBuf、Kryo序列化
-- [X] 增加Netty编解码器
-- [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强
-- [x] 支持异步调用
-- [x] 支持Gzip压缩
-- [x] 支持服务分组与服务版本
-- [x] 连接保持心跳
-- [x] 增加传输协议
+### 项目依赖
+
+- Zookeeper
+- JDK1.8+
+
+### 架构图
+
+<img src="./images/架构图.png" alt="架构图" style="zoom:50%;" />
+
+### 传输协议
+
+<pre>
+    0     1     2     3     4         5     6     7     8     9      10         11         12    13    14    15   16
+    +-----+-----+-----+-----+---------+-----+-----+-----+-----+------+----------+----------+-----+-----+-----+-----+
+    |   magic   code        | version |      full length      | type | protocol | compress |       RequestId       |
+    +-----------------------+---------+-----------------------+------+----------+----------+-----------------------+
+    |                                                                                                              |
+    |                                             body                                                             |
+    |                                                                                                              |
+    |                                            ... ...                                                           |
+    +--------------------------------------------------------------------------------------------------------------+
+  4B  magic code（魔数）      1B version（协议版本）   4B full length（消息长度）    1B type（消息类型）
+  1B  compress（压缩类型）     1B protocol（序列化类型）   4B requestId（请求的Id）
+  body（object类型数据）
+ </pre>
+
+## TODO List
+
+- [x] 基于NIO的Netty网络通讯
+- [x] 基于ZK的服务注册发现，服务启动后将服务信息注册到ZK，客户端订阅发布的服务信息。
+- [x] 客户端负载均衡，客户端从ZK获取到可用服务列表，客户端可配置负载均衡算法。
+- [x] 支持Java、ProtoBuf、Kryo序列化，Kryo效率最高，java效率最差，默认使用Kryo。
+- [x] 增加Netty编解码器，解决TCP粘包\拆包问题。
+- [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强。
+- [x] 支持异步调用，客户端设置回调方法，调用结束后执行回调。
+- [x] 支持Gzip压缩，可在配置文件配置是否启用包压缩，已经压缩算法，减少数据包的大小。
+- [x] 支持服务分组与服务版本，服务接口有多个实现类、接口升级版本支持。
+- [x] 连接保持心跳，复用长连接，心跳保活。
+- [x] 增加传输协议，数据包增加魔数、版本、序列化方式、压缩方式等字段，校验数据包。
+- [ ] 客户端同一服务增加连接池
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流、熔断、降级
 - [ ] 支持灰度
 
+## 使用方式
+
 1. 克隆本项目到本地install。
 
 ```bash
-mvn  clean install -DskipTests=true
+mvn clean install -DskipTests=true
 ```
 
 2. 添加maven依赖到你的`SpringBoot`项目中。
 
  ```xml
-
 <dependency>
     <groupId>cn.ppphuang</groupId>
     <artifactId>rpc-spring-starter</artifactId>
@@ -62,24 +92,7 @@ hp.rpc.server-proxy-type=javassist
 hp.rpc.weight=1
 ```
 
-## 传输协议
-
-<pre>
- *   0     1     2     3     4         5     6     7     8     9      10         11         12    13    14    15   16
- *   +-----+-----+-----+-----+---------+-----+-----+-----+-----+------+----------+----------+-----+-----+-----+-----+
- *   |   magic   code        | version |      full length      | type | protocol | compress |       RequestId       |
- *   +-----------------------+---------+-----------------------+------+----------+----------+-----------------------+
- *   |                                                                                                              |
- *   |                                             body                                                             |
- *   |                                                                                                              |
- *   |                                            ... ...                                                           |
- *   +--------------------------------------------------------------------------------------------------------------+
- * 4B  magic code（魔数）      1B version（协议版本）   4B full length（消息长度）    1B type（消息类型）
- * 1B  compress（压缩类型）     1B protocol（序列化类型）   4B requestId（请求的Id）
- * body（object类型数据）
- </pre>
-
-## 服务端
+### 服务端
 
 1. 定义服务接口。
 
@@ -150,9 +163,9 @@ public class HelloServiceGroup2Version2Impl implements HelloService, PersionServ
 }
  ```
 
-## 客户端
+### 客户端
 
-### 同步调用
+#### 同步调用
 
 1. 使用`@InjectService`注解注入远程服务。
 
@@ -224,7 +237,7 @@ class RpcSpringStarterApplicationTests {
 }
 ```
 
-### 异步调用
+#### 异步调用
 
 1. 首先继承`AsyncReceiveHandler`实现抽象方法。
 

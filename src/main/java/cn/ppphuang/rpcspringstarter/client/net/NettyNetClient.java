@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 客户端网络接口Netty实现
@@ -29,9 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 public class NettyNetClient implements NetClient {
-
-    private static ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 10, 200, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), new NameTreadFactory());
-
     private EventLoopGroup loopGroup = new NioEventLoopGroup(4);
 
     /**
@@ -87,39 +83,26 @@ public class NettyNetClient implements NetClient {
         final String serverAddress = addressInfo[0];
         final String serverPort = addressInfo[1];
         final SendHandlerV2 handler = new SendHandlerV2(address, messageProtocol, compresser);
-        threadPool.submit(() -> {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(loopGroup).channel(NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            ChannelPipeline pipeline = socketChannel.pipeline();
-                            pipeline.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
-                            pipeline.addLast(new MessageDecoder());
-                            pipeline.addLast(new MessageEncoder());
-                            pipeline.addLast(handler);
-                        }
-                    });
-            //new connect
-            ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
-            channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
-                connectedServerNodes.put(address, handler);
-            });
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(loopGroup).channel(NioSocketChannel.class)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        ChannelPipeline pipeline = socketChannel.pipeline();
+                        pipeline.addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS));
+                        pipeline.addLast(new MessageDecoder());
+                        pipeline.addLast(new MessageEncoder());
+                        pipeline.addLast(handler);
+                    }
+                });
+        //new connect
+        ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
+        channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
+            connectedServerNodes.put(address, handler);
         });
         log.debug("使用新的连接。。。");
         return handler.sendRequest(rpcRequest);
-    }
-
-    static class NameTreadFactory implements ThreadFactory {
-
-        private final AtomicInteger mThreadNum = new AtomicInteger(1);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r, "rpcClient-" + mThreadNum.getAndIncrement());
-            return t;
-        }
     }
 }
 
