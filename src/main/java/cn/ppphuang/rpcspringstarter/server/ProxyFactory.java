@@ -58,9 +58,8 @@ public class ProxyFactory {
             //添加到代理类中
             proxyClass.addMethod(methodItem);
         }
-
         //创建invok方法
-        String invokeMethodString = makeInvoke(methods, proxyClass, exceptionName, objectName);
+        String invokeMethodString = makeInvoke(uniqueMethodList, proxyClass, exceptionName, objectName);
         CtMethod invoke = CtMethod.make(invokeMethodString, proxyClass);
         proxyClass.addMethod(invoke);
         return proxyClass.toClass().newInstance();
@@ -235,12 +234,11 @@ public class ProxyFactory {
                 "\");";
     }
 
-    private static String makeInvoke(Method[] methods, CtClass proxyClass, String exceptionName, String objectName) {
+    private static String makeInvoke(ArrayList<Method> methods, CtClass proxyClass, String exceptionName, String objectName) {
         StringBuilder sb = new StringBuilder();
         sb.append("public " + RpcConstant.RPC_RESPONSE_CLASS_NAME + " invoke(" + RpcConstant.RPC_REQUEST_CLASS_NAME + " request) throws " + exceptionName + " {");
         sb.append("String methodName = request.getMethod();");
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
+        for (Method method : methods) {
             String methodName = method.getName();
             if ("equals".equalsIgnoreCase(methodName) || "toString".equalsIgnoreCase(methodName) || "hashCode".equalsIgnoreCase(methodName)) {
                 continue;
