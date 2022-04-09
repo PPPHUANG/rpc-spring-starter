@@ -17,6 +17,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -32,9 +33,9 @@ public class NettyNetClient implements NetClient {
 
     /**
      * 已连接的服务缓存
-     * key: 服务地址 ip:port
+     * key: 服务地址 InetSocketAddress ip:port
      */
-    public static Map<String, SendHandlerV2> connectedServerNodes = new ConcurrentHashMap<>();
+    public static Map<InetSocketAddress, SendHandlerV2> connectedServerNodes = new ConcurrentHashMap<>();
 
     @Override
     public byte[] sendRequest(byte[] data, Service service) throws InterruptedException {
@@ -72,17 +73,18 @@ public class NettyNetClient implements NetClient {
     @Override
     public RpcResponse sendRequest(RpcRequest rpcRequest, Service service, RpcProtocolEnum messageProtocol, RpcCompressEnum compresser) {
         String address = service.getAddress();
-        synchronized (address) {
-            if (connectedServerNodes.containsKey(address)) {
-                SendHandlerV2 handlerV2 = connectedServerNodes.get(address);
-                log.debug("使用现有连接");
-                return handlerV2.sendRequest(rpcRequest);
-            }
-        }
         String[] addressInfo = address.split(":");
         final String serverAddress = addressInfo[0];
         final String serverPort = addressInfo[1];
-        final SendHandlerV2 handler = new SendHandlerV2(address, messageProtocol, compresser);
+        InetSocketAddress inetSocketAddress = InetSocketAddress.createUnresolved(serverAddress, Integer.parseInt(serverPort));
+        synchronized (address) {
+            if (connectedServerNodes.containsKey(inetSocketAddress)) {
+                SendHandlerV2 handlerV2 = connectedServerNodes.get(inetSocketAddress);
+                log.debug("使用现有连接");
+                return handlerV2.sendRequest(rpcRequest, messageProtocol, compresser);
+            }
+        }
+        final SendHandlerV2 handler = new SendHandlerV2();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(loopGroup).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -99,10 +101,10 @@ public class NettyNetClient implements NetClient {
         //new connect
         ChannelFuture channelFuture = bootstrap.connect(serverAddress, Integer.parseInt(serverPort));
         channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
-            connectedServerNodes.put(address, handler);
+            connectedServerNodes.put(inetSocketAddress, handler);
         });
         log.debug("使用新的连接。。。");
-        return handler.sendRequest(rpcRequest);
+        return handler.sendRequest(rpcRequest, messageProtocol, compresser);
     }
 }
 

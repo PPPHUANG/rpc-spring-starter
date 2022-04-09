@@ -169,4 +169,14 @@ public class RpcConstant {
      * HEAD_LENGTH
      */
     public static final int HEAD_LENGTH = 16;
+
+    /**
+     * 等待响应最大时间
+     */
+    public static final int RESPONSE_WAIT_TIME = 8;
+
+    /**
+     * 等待通道建立超时时间
+     */
+    public static final int CHANNEL_WAIT_TIME = 4;
 }
