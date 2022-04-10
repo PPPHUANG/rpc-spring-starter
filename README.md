@@ -45,7 +45,7 @@
 - [x] 支持服务分组与服务版本，服务接口有多个实现类、接口升级版本支持。
 - [x] 连接保持心跳，复用长连接，心跳保活。
 - [x] 增加传输协议，数据包增加魔数、版本、序列化方式、压缩方式等字段，校验数据包。
-- [ ] 客户端同一服务增加连接池
+- [x] 客户端增加Netty连接池
 - [ ] 调用鉴权
 - [ ] 调用监控、告警
 - [ ] 调用限流、熔断、降级
@@ -88,6 +88,12 @@ hp.rpc.protocol=kryo
 hp.rpc.enable-compress=false
 #压缩算法 默认：Gzip, 目前可选 Gzip
 hp.rpc.compress=Gzip
+#Netty客户端是否使用连接池 默认：false
+hp.rpc.enable-netty-channel-pool=false
+#Netty客户端连接池中的最大连接数
+hp.rpc.netty-channel-pool-max-connections=5
+#Netty客户端连接池获取连接超时时是否创建新连接 默认：false
+hp.rpc.netty-channel-pool-get-new-on-acquire-timeout=false
 #服务代理类型 默认：javassist， 可选 reflect 反射调用、 javassist 字节码生成代理类调用
 hp.rpc.server-proxy-type=javassist
 #服务权重

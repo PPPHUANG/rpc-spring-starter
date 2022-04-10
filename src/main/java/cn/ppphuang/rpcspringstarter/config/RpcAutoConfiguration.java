@@ -5,6 +5,7 @@ import cn.ppphuang.rpcspringstarter.client.balance.LoadBalance;
 import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
+import cn.ppphuang.rpcspringstarter.client.net.NettyNetPoolClientPool;
 import cn.ppphuang.rpcspringstarter.common.Extension.ExtensionLoader;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
@@ -76,8 +77,7 @@ public class RpcAutoConfiguration {
         clientProxyFactory.setServiceDiscoverer(new ZookeeperServerDiscovery(rpcConfig.getRegisterAddress()));
         LoadBalance loadBalance = getLoadBalance(rpcConfig.getLoadBalance());
         clientProxyFactory.setLoadBalance(loadBalance);
-        clientProxyFactory.setNetClient(new NettyNetClient());
-
+        clientProxyFactory.setNetClient(rpcConfig.isEnableNettyChannelPool() ? new NettyNetPoolClientPool(rpcConfig.getNettyChannelPoolMaxConnections(), rpcConfig.isNettyChannelPoolGetNewOnAcquireTimeout()) : new NettyNetClient());
         return clientProxyFactory;
     }
 

@@ -42,6 +42,21 @@ public class RpcConfig {
     private boolean enableCompress = false;
 
     /**
+     * Netty客户端是否使用连接池
+     */
+    private boolean enableNettyChannelPool = false;
+
+    /**
+     * Netty连接池中的最大连接数
+     */
+    private Integer nettyChannelPoolMaxConnections = 5;
+
+    /**
+     * Netty连接池获取连接超时时是否创建新连接
+     */
+    private boolean nettyChannelPoolGetNewOnAcquireTimeout = false;
+
+    /**
      * 负载均衡算法
      */
     private String loadBalance = "random";
@@ -126,5 +141,29 @@ public class RpcConfig {
 
     public void setCompress(String compress) {
         this.compress = compress;
+    }
+
+    public boolean isEnableNettyChannelPool() {
+        return enableNettyChannelPool;
+    }
+
+    public void setEnableNettyChannelPool(boolean enableNettyChannelPool) {
+        this.enableNettyChannelPool = enableNettyChannelPool;
+    }
+
+    public Integer getNettyChannelPoolMaxConnections() {
+        return nettyChannelPoolMaxConnections;
+    }
+
+    public void setNettyChannelPoolMaxConnections(Integer nettyChannelPoolMaxConnections) {
+        this.nettyChannelPoolMaxConnections = nettyChannelPoolMaxConnections;
+    }
+
+    public boolean isNettyChannelPoolGetNewOnAcquireTimeout() {
+        return nettyChannelPoolGetNewOnAcquireTimeout;
+    }
+
+    public void setNettyChannelPoolGetNewOnAcquireTimeout(boolean nettyChannelPoolGetNewOnAcquireTimeout) {
+        this.nettyChannelPoolGetNewOnAcquireTimeout = nettyChannelPoolGetNewOnAcquireTimeout;
     }
 }

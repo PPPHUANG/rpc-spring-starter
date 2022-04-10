@@ -94,7 +94,8 @@ public class SendBaseHandler extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
         log.error("channel inactive with remoteAddress:[{}]", ctx.channel().remoteAddress());
         InetSocketAddress socketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-        NettyNetClient.connectedServerNodes.remove(socketAddress);
+        InetSocketAddress inetSocketAddress = InetSocketAddress.createUnresolved(socketAddress.getAddress().getHostAddress(), socketAddress.getPort());
+        NettyNetClient.connectedServerNodes.remove(inetSocketAddress);
     }
 
     @Override
