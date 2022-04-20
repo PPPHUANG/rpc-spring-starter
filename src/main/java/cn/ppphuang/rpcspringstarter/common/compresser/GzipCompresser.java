@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.compresser;
 
-import cn.ppphuang.rpcspringstarter.annotation.CompresserAno;
+import cn.ppphuang.rpcspringstarter.annotation.SPIExtension;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +15,7 @@ import java.util.zip.GZIPOutputStream;
  * @Author: ppphuang
  * @Create: 2022/4/2
  */
-@CompresserAno(RpcConstant.COMPRESS_GZIP)
+@SPIExtension(RpcConstant.COMPRESS_GZIP)
 public class GzipCompresser implements Compresser {
     private static final int BUFFER_SIZE = 1024 * 4;
 

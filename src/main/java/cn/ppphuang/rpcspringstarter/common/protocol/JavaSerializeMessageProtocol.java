@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.protocol;
 
-import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.annotation.SPIExtension;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
@@ -13,7 +13,7 @@ import java.io.*;
  * @Author: ppphuang
  * @Create: 2021/9/10
  */
-@MessageProtocolAno(RpcConstant.PROTOCOL_JAVA)
+@SPIExtension(RpcConstant.PROTOCOL_JAVA)
 public class JavaSerializeMessageProtocol implements MessageProtocol {
 
     private byte[] serialize(Object o) throws IOException {

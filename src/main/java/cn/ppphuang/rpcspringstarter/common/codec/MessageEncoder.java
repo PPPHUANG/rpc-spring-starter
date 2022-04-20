@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.codec;
 
-import cn.ppphuang.rpcspringstarter.common.Extension.ExtensionLoader;
+import cn.ppphuang.rpcspringstarter.common.extension.ExtensionLoader;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
@@ -55,8 +55,7 @@ public class MessageEncoder extends MessageToByteEncoder<RpcMessage> {
             // if messageType is not heartbeat message,fullLength = head length + body length
             if (messageType != RpcConstant.HEARTBEAT_REQUEST_TYPE && messageType != RpcConstant.HEARTBEAT_RESPONSE_TYPE) {
                 // serialize the object
-                MessageProtocol messageProtocol = ExtensionLoader.supportMessageProtocols.get(rpcMessage.getProtocol().getProtocol());
-
+                MessageProtocol messageProtocol = ExtensionLoader.getExtensionLoader(MessageProtocol.class).getExtension(rpcMessage.getProtocol().getProtocol());
                 if (messageType == RpcConstant.REQUEST_TYPE) {
                     bodyBytes = messageProtocol.marshallingRequest((RpcRequest) rpcMessage.getData());
                 } else {
@@ -65,7 +64,7 @@ public class MessageEncoder extends MessageToByteEncoder<RpcMessage> {
 
                 // compress the bytes
                 if (rpcMessage.getCompress() != RpcCompressEnum.UNZIP) {
-                    Compresser compresser = ExtensionLoader.supportCompressers.get(rpcMessage.getCompress().getCompress());
+                    Compresser compresser = ExtensionLoader.getExtensionLoader(Compresser.class).getExtension(rpcMessage.getCompress().getCompress());
                     log.debug("before compress length:{}", bodyBytes.length);
                     bodyBytes = compresser.compress(bodyBytes);
                     log.debug("after compress length:{}", bodyBytes.length);

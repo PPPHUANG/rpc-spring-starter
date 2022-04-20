@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.codec;
 
-import cn.ppphuang.rpcspringstarter.common.Extension.ExtensionLoader;
+import cn.ppphuang.rpcspringstarter.common.extension.ExtensionLoader;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
@@ -84,13 +84,13 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
             in.readBytes(bs);
             // decompress the bytes
             if (rpcMessage.getCompress() != RpcCompressEnum.UNZIP) {
-                Compresser compresser = ExtensionLoader.supportCompressers.get(rpcMessage.getCompress().getCompress());
+                Compresser compresser = ExtensionLoader.getExtensionLoader(Compresser.class).getExtension(rpcMessage.getCompress().getCompress());
                 log.debug("before decompress length:{}", bs.length);
                 bs = compresser.decompress(bs);
                 log.debug("after decompress length:{}", bs.length);
             }
             // deserialize the object
-            MessageProtocol messageProtocol = ExtensionLoader.supportMessageProtocols.get(rpcMessage.getProtocol().getProtocol());
+            MessageProtocol messageProtocol = ExtensionLoader.getExtensionLoader(MessageProtocol.class).getExtension(rpcMessage.getProtocol().getProtocol());
             if (messageType == RpcConstant.REQUEST_TYPE) {
                 RpcRequest tmpValue = messageProtocol.unmarshallingRequest(bs);
                 rpcMessage.setData(tmpValue);

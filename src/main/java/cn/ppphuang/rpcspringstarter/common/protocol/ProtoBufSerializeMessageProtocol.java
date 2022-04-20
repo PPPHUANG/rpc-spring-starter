@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.protocol;
 
-import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.annotation.SPIExtension;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
@@ -12,7 +12,7 @@ import cn.ppphuang.rpcspringstarter.util.SerializingUtil;
  * @Author: ppphuang
  * @Create: 2021/9/14
  */
-@MessageProtocolAno(RpcConstant.PROTOCOL_PROTOBUF)
+@SPIExtension(RpcConstant.PROTOCOL_PROTOBUF)
 public class ProtoBufSerializeMessageProtocol implements MessageProtocol {
     @Override
     public byte[] marshallingRequest(RpcRequest request) throws Exception {

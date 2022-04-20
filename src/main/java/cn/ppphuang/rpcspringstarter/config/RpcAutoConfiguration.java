@@ -6,7 +6,7 @@ import cn.ppphuang.rpcspringstarter.client.discovery.ZookeeperServerDiscovery;
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetClient;
 import cn.ppphuang.rpcspringstarter.client.net.NettyNetPoolClientPool;
-import cn.ppphuang.rpcspringstarter.common.Extension.ExtensionLoader;
+import cn.ppphuang.rpcspringstarter.common.extension.ExtensionLoaderV1;
 import cn.ppphuang.rpcspringstarter.common.compresser.Compresser;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcCompressEnum;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcProtocolEnum;
@@ -41,14 +41,14 @@ import java.util.ServiceLoader;
 @ConditionalOnProperty(prefix = "hp.rpc", name = "enable", havingValue = "true", matchIfMissing = true)
 public class RpcAutoConfiguration {
 
-    @PostConstruct
+    //    @PostConstruct
     public void extensionLoader() {
         //setSupportMessageProtocols
         Map<String, MessageProtocol> supportMessageProtocol = buildSupportMessageProtocol();
-        ExtensionLoader.setSupportMessageProtocols(supportMessageProtocol);
+        ExtensionLoaderV1.setSupportMessageProtocols(supportMessageProtocol);
         //setSupportCompresser
         Map<String, Compresser> supportCompresser = buildSupportCompresser();
-        ExtensionLoader.setSupportCompressers(supportCompresser);
+        ExtensionLoaderV1.setSupportCompressers(supportCompresser);
     }
 
     @Bean

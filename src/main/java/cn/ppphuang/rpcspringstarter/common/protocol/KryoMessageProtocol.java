@@ -1,6 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.protocol;
 
-import cn.ppphuang.rpcspringstarter.annotation.MessageProtocolAno;
+import cn.ppphuang.rpcspringstarter.annotation.SPIExtension;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
@@ -21,7 +21,7 @@ import java.io.ByteArrayOutputStream;
  * @Author: ppphuang
  * @Create: 2021/9/14
  */
-@MessageProtocolAno(RpcConstant.PROTOCOL_KRYO)
+@SPIExtension(RpcConstant.PROTOCOL_KRYO)
 public class KryoMessageProtocol implements MessageProtocol {
     private static final ThreadLocal<Kryo> kryoLocal = new ThreadLocal<Kryo>() {
         @Override

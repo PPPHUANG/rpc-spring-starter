@@ -1,5 +1,6 @@
 package cn.ppphuang.rpcspringstarter.common.protocol;
 
+import cn.ppphuang.rpcspringstarter.annotation.SPI;
 import cn.ppphuang.rpcspringstarter.common.model.RpcRequest;
 import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
 
@@ -10,6 +11,7 @@ import cn.ppphuang.rpcspringstarter.common.model.RpcResponse;
  * @Author: ppphuang
  * @Create: 2021/9/9
  */
+@SPI
 public interface MessageProtocol {
     /**
      * 编组请求
