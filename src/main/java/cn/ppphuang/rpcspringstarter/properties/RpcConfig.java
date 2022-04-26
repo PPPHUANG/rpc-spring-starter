@@ -44,12 +44,12 @@ public class RpcConfig {
     /**
      * Netty客户端是否使用连接池
      */
-    private boolean enableNettyChannelPool = false;
+    private boolean enableNettyChannelPool = true;
 
     /**
      * Netty连接池中的最大连接数
      */
-    private Integer nettyChannelPoolMaxConnections = 5;
+    private Integer nettyChannelPoolMaxConnections = 20;
 
     /**
      * Netty连接池获取连接超时时是否创建新连接

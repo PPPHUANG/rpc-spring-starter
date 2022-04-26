@@ -183,7 +183,7 @@ public class RpcConstant {
     /**
      * Netty连接池获取连接超时时间
      */
-    public static final int POOL_CHANNEL_WAIT_TIME = 1;
+    public static final int POOL_CHANNEL_WAIT_TIME = 1000;
 
     /**
      * Integer.MAX_VALUE调整为100000，避免oom风险
