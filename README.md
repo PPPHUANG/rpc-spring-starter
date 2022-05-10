@@ -37,7 +37,7 @@
 - [x] 基于NIO的Netty网络通讯
 - [x] 基于ZK的服务注册发现，服务启动后将服务信息注册到ZK，客户端订阅发布的服务信息。
 - [x] 客户端负载均衡，客户端从ZK获取到可用服务列表，客户端可配置负载均衡算法。
-- [x] 支持Java、ProtoBuf、Kryo序列化，Kryo效率最高，java效率最差，默认使用Kryo。
+- [x] 支持Java、ProtoBuf、Kryo、hessian序列化，Kryo效率最高，java效率最差，默认使用Kryo。
 - [x] 增加Netty编解码器，解决TCP粘包\拆包问题。
 - [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强。
 - [x] 支持异步调用，客户端设置回调方法，调用结束后执行回调。
@@ -83,7 +83,7 @@ hp.rpc.register-address=127.0.0.1:2128
 hp.rpc.server-port=9999
 #客户端随机负载均衡 默认：random，可选 random 随机 、round 轮询、 加权轮询 weightRound 、平滑加权轮询 smoothWeightRound
 hp.rpc.load-balance=random
-#序列化协议 默认：kryo, 可选 kryo 、 java 、 protobuf
+#序列化协议 默认：kryo, 可选 kryo 、 java 、 protobuf 、 hessian
 hp.rpc.protocol=kryo
 #服务是否启用压缩算法 默认：false
 hp.rpc.enable-compress=false

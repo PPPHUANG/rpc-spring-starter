@@ -46,6 +46,11 @@ public class RpcConstant {
     public static final String PROTOCOL_KRYO = "kryo";
 
     /**
+     * hessian序列化协议
+     */
+    public static final String HESSIAN_KRYO = "hessian";
+
+    /**
      * 解压缩算法
      */
     public static final String COMPRESS_GZIP = "Gzip";
