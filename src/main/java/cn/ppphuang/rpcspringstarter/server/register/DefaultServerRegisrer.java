@@ -36,4 +36,8 @@ public abstract class DefaultServerRegisrer implements ServerRegister {
     public ServiceObject getServiceObject(String name) throws Exception {
         return serviceMap.get(name);
     }
+
+    public Map<String, ServiceObject> getAllServiceObject() {
+        return serviceMap;
+    }
 }

@@ -67,6 +67,7 @@ public class NettyRpcServer extends RpcServer {
             e.printStackTrace();
             log.error("start netty server failed, message: {}", e.getMessage());
         } finally {
+            log.debug("shutdownGracefully");
             boosGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

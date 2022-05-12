@@ -16,6 +16,13 @@ public interface ServerRegister {
     void register(ServiceObject so) throws Exception;
 
     /**
+     * 移除服务对象
+     *
+     * @throws Exception
+     */
+    void remove();
+
+    /**
      * 获取服务对象
      *
      * @param name

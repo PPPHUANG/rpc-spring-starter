@@ -8,6 +8,7 @@ import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 import cn.ppphuang.rpcspringstarter.common.constants.RpcConstant;
 import cn.ppphuang.rpcspringstarter.server.Container;
 import cn.ppphuang.rpcspringstarter.server.RpcServer;
+import cn.ppphuang.rpcspringstarter.server.ShutdownHook;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 import org.springframework.aop.support.AopUtils;
@@ -48,8 +49,8 @@ public abstract class DefaultRpcBaseProcessor implements ApplicationListener<Con
         if (Objects.isNull(contextRefreshedEvent.getApplicationContext().getParent())) {
             ApplicationContext applicationContext = contextRefreshedEvent.getApplicationContext();
             Container.setSpringContext(applicationContext);
-            startServer(applicationContext);
             injectService(applicationContext);
+            startBaseServer(applicationContext);
         }
     }
 
@@ -98,6 +99,11 @@ public abstract class DefaultRpcBaseProcessor implements ApplicationListener<Con
             });
             log.info("subscribe service zk node successfully");
         }
+    }
+
+    private void startBaseServer(ApplicationContext context) {
+        ShutdownHook.registerShutdownHook(serverRegister, rpcServer);
+        startServer(context);
     }
 
     protected abstract void startServer(ApplicationContext context);
