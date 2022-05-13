@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * zk服务注册器，提供服务注册、发现能力
@@ -25,6 +25,8 @@ public class ZookeeperServerRegister extends DefaultServerRegisrer {
     private static final Gson GSON = new Gson();
 
     private ZkClient zkClient;
+
+    private static ArrayList<String> ExportedServiceURI = new ArrayList<>();
 
     public ZookeeperServerRegister(String zkAddress, Integer port, String protocol, String compress, Integer weight) {
         zkClient = new ZkClient(zkAddress);
@@ -56,16 +58,8 @@ public class ZookeeperServerRegister extends DefaultServerRegisrer {
 
     @Override
     public void remove() {
-        Map<String, ServiceObject> allServiceObject = getAllServiceObject();
-        if (!allServiceObject.isEmpty()) {
-            allServiceObject.forEach((name, service) -> {
-                try {
-                    removeService(getService(service));
-                } catch (UnknownHostException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
+        //父类serviceMap中的同一个service可能有不同版本，不同版本的发布到注册中心的URI一样，所以用ExportedServiceURI记录的已发布的URI来避免重复删除
+        ExportedServiceURI.forEach(this::removeService);
     }
 
     /**
@@ -87,30 +81,23 @@ public class ZookeeperServerRegister extends DefaultServerRegisrer {
             zkClient.createPersistent(servicePath, true);
         }
         String uriPath = servicePath + RpcConstant.ZK_PATH_DELIMITER + uri;
-        if (zkClient.exists(uriPath)) {
-            //删除之前的节点
-            zkClient.delete(uriPath);
+        //同一个service可能有多个版本的实现，所以可能已经被注册到注册中心，这样就不需要注册了
+        if (!zkClient.exists(uriPath)) {
+            //创建一个临时节点，会话失效即被清理
+            zkClient.createEphemeral(uriPath);
+            //发布的URI记录到map里，方便关机取消注册
+            ExportedServiceURI.add(uriPath);
+            log.debug("service :{} exported zk", serviceResource);
         }
-        //创建一个临时节点，会话失效即被清理
-        zkClient.createEphemeral(uriPath);
     }
 
     /**
      * 从zk中移除服务
      *
-     * @param serviceResource
+     * @param serviceUri
      */
-    public void removeService(Service serviceResource) {
-        String name = serviceResource.getName();
-        String uri = GSON.toJson(serviceResource);
-        try {
-            uri = URLEncoder.encode(uri, RpcConstant.UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String servicePath = RpcConstant.ZK_SERVICE_PATH + RpcConstant.ZK_PATH_DELIMITER + name + "/service";
-        String uriPath = servicePath + RpcConstant.ZK_PATH_DELIMITER + uri;
-        boolean delete = zkClient.delete(uriPath);
-        log.info("remove service :{} res :{}", serviceResource, delete);
+    public void removeService(String serviceUri) {
+        boolean delete = zkClient.delete(serviceUri);
+        log.debug("remove serviceURI :{} res :{}", serviceUri, delete);
     }
 }
