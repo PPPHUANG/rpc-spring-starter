@@ -40,7 +40,7 @@
 - [x] 支持Java、ProtoBuf、Kryo、hessian序列化，Kryo效率最高，java效率最差，默认使用Kryo。
 - [x] 增加Netty编解码器，解决TCP粘包\拆包问题。
 - [x] 支持可配置的服务端代理模式，可选反射调用、字节码增强。
-- [x] 支持异步调用，客户端设置回调方法，调用结束后执行回调。
+- [x] 支持CompletableFuture异步调用，也可以在客户端自定义回调方法类，调用结束后执行回调。
 - [x] 支持Gzip压缩，可在配置文件配置是否启用包压缩，已经压缩算法，减少数据包的大小。
 - [x] 支持服务分组与服务版本，服务接口有多个实现类、接口升级版本支持。
 - [x] 连接保持心跳，复用长连接，心跳保活。
@@ -247,6 +247,33 @@ class RpcSpringStarterApplicationTests {
 ```
 
 #### 异步调用
+
+##### 使用 CompletableFuture 异步方式
+
+```java
+ class RpcSpringStarterApplicationTests {
+
+    @Autowired
+    ClientProxyFactory clientProxyFactory;
+
+    @Test
+    void testCompletableFutureAsync() {
+        //构造异步客户端
+        AsyncExecutor<HelloService> helloServiceAsyncExecutor = new AsyncExecutor<>(clientProxyFactory, HelloService.class, "", "");
+        String name = "ppphuang";
+        //通过异步客户端调用远程方法，返回CompletableFuture
+        CompletableFuture<String> ppphuang = helloServiceAsyncExecutor.async(server -> server.hello(name));
+        //通过whenComplete添加日志记录 一般使用handle处理之后不使用
+        CompletableFuture<String> stringCompletableFuture = ppphuang.whenComplete(new LogErrorAction<>("server.hello", name));
+        //通过handle处理 异常情况下的默认值 返回值为空时的默认值 日志记录
+        CompletableFuture<String> hp = stringCompletableFuture.handle(new DefaultValueHandle<>(true, "hp", "server.hello", name));
+        //获取结果
+        System.out.println(hp.join());
+    }
+}
+```
+
+##### 自定义异步回调类
 
 1. 首先继承`AsyncReceiveHandler`实现抽象方法。
 
