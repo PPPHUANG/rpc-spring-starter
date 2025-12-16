@@ -2,7 +2,6 @@ package cn.ppphuang.rpcspringstarter.client.async;
 
 import cn.ppphuang.rpcspringstarter.client.net.ClientProxyFactory;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -19,8 +18,8 @@ public class AsyncExecutor<C> {
         this.client = clientProxyFactory.getProxy(clazz, group, version, true);
     }
 
-    public <R> CompletableFuture<R> async(Function<C, R> function) {
-        CompletableFuture<R> future = new CompletableFuture<>();
+    public <R> RpcCompletableFuture<R> async(Function<C, R> function) {
+        RpcCompletableFuture<R> future = new RpcCompletableFuture<>();
         ClientProxyFactory.setLocalAsyncContextAndAsyncReceiveHandler(future, CompletableFutureAsyncCallBack.instance());
         try {
             function.apply(client);
